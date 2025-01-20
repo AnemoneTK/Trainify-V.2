@@ -1,0 +1,15 @@
+# version: "3.8"
+
+# services:
+#   mongo:
+#     image: mongo:latest
+#     container_name: mongodb
+#     ports:
+#       - "27017:27017" # เปิดพอร์ต 27017 ของคอนเทนเนอร์ไปยังพอร์ต 27017 ของโฮสต์
+#     env_file:
+#       - .env # โหลดตัวแปร environment จากไฟล์ .env.docker
+#     volumes:
+#       - ./data/mongo:/data/db # กำหนด volume สำหรับเก็บข้อมูล MongoDB
+
+# volumes:
+#   mongo_data:

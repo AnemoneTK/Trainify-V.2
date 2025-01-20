@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+* {
+  font-family: "Kanit", system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+.centered-table .ant-table-cell {
+  text-align: center;
+}
+
+.centered-table .ant-table-thead > tr > th {
+  text-align: center;
+}
+.no-scroll {
+  overflow-y: hidden !important;
+}
+
+.table-container {
+  width: 100%;
+  overflow-y: hidden;
+  position: relative;
+}
+.ant-table-wrapper {
+  overflow-y: hidden !important; 
+}
+.ant-table {
+  width: 100% !important; 
+  table-layout: fixed; 
+}
+.events {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.events .ant-badge-status {
+  width: 100%;
+  overflow: hidden;
+  font-size: 12px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.notes-month {
+  font-size: 28px;
+  text-align: center;
+}
+.notes-month section {
+  font-size: 28px;
+}
