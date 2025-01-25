@@ -1,13 +1,15 @@
-import express, { Request, Response } from "express";
-import session from "express-session";
+import express from "express";
+const session = require("express-session");
 import path from "path";
 import dotenv from "dotenv";
 import cors from "cors";
+import helmet from "helmet";
+import cron from "node-cron";
 
 import usersRoutes from "./routes/usersRoutes";
 import authRoutes from "./routes/authRoutes";
 import courseRoutes from "./routes/courseRoutes";
-
+import errorHandler from "./middlewares/errorHandler";
 import { checkExpiryAndNotify } from "./controller/course/expiryCourseEmail";
 import formatResponse from "./middlewares/formatResponse";
 const app = express();
@@ -15,14 +17,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
     credentials: true,
     exposedHeaders: ["SET-COOKIE"],
   })
 );
-
+app.use(helmet());
 app.use(formatResponse);
-
+dotenv.config();
+app.use(errorHandler);
 const key = process.env.DATABASE_URL as string;
 app.use(
   session({
@@ -36,6 +39,21 @@ app.use(
     },
   })
 );
+app.use(
+  (
+    err: Error,
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+  ) => {
+    console.error(err.stack);
+    res.status(500).json({
+      status: "error",
+      message: "Internal Server Error",
+    });
+  }
+);
+
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 dotenv.config();
 
@@ -43,6 +61,7 @@ app.use("/api/users", usersRoutes);
 app.use("/api/course", courseRoutes);
 app.use("/auth", authRoutes);
 
-setInterval(checkExpiryAndNotify, 24 * 60 * 60 * 1000);
+// รันทุกวันเวลาเที่ยงคืน
+cron.schedule("0 0 * * *", checkExpiryAndNotify);
 
 export default app;

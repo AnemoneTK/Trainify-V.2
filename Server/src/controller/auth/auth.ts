@@ -9,7 +9,7 @@ import LogoutLogSchema from "../../models/logoutLogSchema";
 
 export const auth = async (req: Request, res: Response) => {
   const { role } = req.body;
-  const authToken = req.session.token;
+  const authToken = (req.session as any).token;
 
   console.log("authToken:", authToken);
 

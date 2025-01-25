@@ -17,8 +17,8 @@ export const createOtp = async (req: Request, res: Response) => {
   try {
     // ตรวจสอบ session token
     const userId =
-      req.session.token &&
-      (jwt.verify(req.session.token, JWT_SECRET) as JwtPayload);
+      (req.session as any).token &&
+      (jwt.verify((req.session as any).token, JWT_SECRET) as JwtPayload);
     if (!userId) {
       return res.status(403).json({
         status: "error",
@@ -92,8 +92,8 @@ export const resetOtp = async (req: Request, res: Response) => {
   try {
     // ตรวจสอบ session token
     const userId =
-      req.session.token &&
-      (jwt.verify(req.session.token, JWT_SECRET) as JwtPayload);
+      (req.session as any).token &&
+      (jwt.verify((req.session as any).token, JWT_SECRET) as JwtPayload);
 
     if (!userId) {
       return res.status(403).json({
@@ -201,8 +201,8 @@ export const verifyOtp = async (req: Request, res: Response) => {
 
   try {
     const userId =
-      req.session.token &&
-      (jwt.verify(req.session.token, JWT_SECRET) as JwtPayload);
+      (req.session as any).token &&
+      (jwt.verify((req.session as any).token, JWT_SECRET) as JwtPayload);
     if (!userId) {
       return res.status(403).json({
         status: "error",
@@ -266,7 +266,7 @@ export const verifyOtp = async (req: Request, res: Response) => {
     user.lastOtpSentTime = null;
     await user.save();
 
-    req.session.token = token;
+    (req.session as any).token = token;
     return res.status(200).json({
       status: "success",
       message: "OTP ถูกต้อง",
