@@ -9,7 +9,7 @@ import {
   JWT_SECRET,
 } from "../../utils/constants";
 import LogoutLogSchema from "../../models/logoutLogSchema";
-
+import { ObjectId } from "mongodb";
 const User = UserSchema;
 
 export const checkUser = async (req: Request, res: Response) => {
@@ -45,11 +45,7 @@ export const checkUser = async (req: Request, res: Response) => {
     }
 
     if (user.status === "deleted") {
-      return res.error(
-        404,
-        "ไม่พบบัญชีผู้ใช้",
-        "บัญชีนี้ถูกตั้งสถานะเป็นโดนลบ"
-      );
+      return res.error(404, "ไม่พบบัญชีผู้ใช้");
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -57,12 +53,6 @@ export const checkUser = async (req: Request, res: Response) => {
     if (!isPasswordValid) {
       return res.error(400, "รหัสผ่านไม่ถูกต้อง");
     }
-
-    const JWT_userID = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, {
-      expiresIn: "2h",
-    });
-
-    (req.session as any).JWT_userID = JWT_userID;
 
     if (user.policyAccepted === null) {
       return res.error(
@@ -73,6 +63,13 @@ export const checkUser = async (req: Request, res: Response) => {
         "info"
       );
     }
+
+    const userID: { id: string; role: string } = {
+      id: (user._id as ObjectId).toString(),
+      role: user.role,
+    };
+
+    (req.session as any).userID = userID;
 
     return res.success(
       "เข้าสู่ระบบสำเร็จ กรุณาสร้าง OTP",
@@ -89,50 +86,61 @@ export const checkUser = async (req: Request, res: Response) => {
 };
 
 export const logoutUser = async (req: Request, res: Response) => {
-  const token = (req.session as any).token;
-
-  if (!token) {
-    return res.error(401, "ไม่พบ token");
-  }
-
-  let decodedToken: JwtPayload | null = null;
-  let reason = "ออกจากระบบ";
-
   try {
-    decodedToken = jwt.verify(token, JWT_SECRET) as JwtPayload;
-  } catch (error) {
-    reason = "token หมดอายุ";
-    decodedToken = jwt.decode(token) as JwtPayload; // Decode token หากหมดอายุ
-  }
+    const token = (req.session as any).token;
 
-  if (!decodedToken || !decodedToken.id || !decodedToken.role) {
-    return res.error(401, "Token ไม่ถูกต้อง");
-  }
+    if (!token || typeof token !== "string") {
+      return res.error(401, "ไม่พบ token หรือ token ไม่ถูกต้อง");
+    }
 
-  const { id: userId, role } = decodedToken;
+    let decodedToken: JwtPayload | null = null;
+    let reason = "ออกจากระบบ";
 
-  try {
-    const logoutLog = new LogoutLogSchema({
+    try {
+      decodedToken = jwt.verify(token, JWT_SECRET) as JwtPayload;
+      console.log("✅ Token Verified:", decodedToken);
+    } catch (error) {
+      reason = "token หมดอายุ";
+      decodedToken = jwt.decode(token) as JwtPayload;
+      console.log("⚠️ Token Expired:", decodedToken);
+    }
+
+    if (!decodedToken || !decodedToken.id || !decodedToken.role) {
+      return res.error(401, "Token ไม่ถูกต้อง");
+    }
+
+    const { id: userId, role, email } = decodedToken;
+
+    const userIp = req.ip || req.headers["x-forwarded-for"] || "Unknown IP";
+    console.log("🔹 User Logout:", { userId, role, reason, ip: userIp });
+
+    // บันทึก Log การออกจากระบบ
+    await LogoutLogSchema.create({
       userId,
       role,
+      email,
       reason,
-      ip: req.ip || "Unknown IP",
-      logoutAt: new Date(),
+      ip: userIp,
+      logoutAt: new Date().toISOString(), // ใช้รูปแบบ ISO Date
     });
 
-    await logoutLog.save();
+    // แปลง `req.session.destroy()` ให้เป็น Promise-based function
+    const destroySession = () =>
+      new Promise<void>((resolve, reject) => {
+        req.session.destroy((err) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
 
-    req.session.destroy((err) => {
-      if (err) {
-        return res.error(500, "เกิดข้อผิดพลาดในการลบ session", err.message);
-      }
+    await destroySession();
 
-      return res.success("Logout สำเร็จ");
-    });
+    return res.success("Logout สำเร็จ");
   } catch (error) {
+    console.error("❌ Logout Error:", error);
     return res.error(
       500,
-      "เกิดข้อผิดพลาดในการบันทึก log การออกจากระบบ",
+      "เกิดข้อผิดพลาดในการออกจากระบบ",
       (error as Error).message
     );
   }

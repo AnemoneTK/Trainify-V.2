@@ -1,41 +1,16 @@
 import { useEffect, useState } from "react";
-import { Button } from "antd";
-import axios from "axios";
+import { Input, Button } from "antd";
+import callApi from "../utils/axios";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 
 export default function Otp() {
-  const URL = import.meta.env.VITE_BASE_URL;
   const navigate = useNavigate();
 
-  // สร้างสถานะสำหรับเก็บค่าที่กรอกในแต่ละช่อง
-  const [otp, setOtp] = useState(new Array(6).fill(""));
+  const [otp, setOtp] = useState("");
 
-  // ฟังก์ชันจัดการเมื่อมีการเปลี่ยนแปลงในช่องกรอก
-  const handleChange = (element, index) => {
-    if (/^[0-9]$/.test(element.value) || element.value === "") {
-      const newOtp = [...otp];
-      newOtp[index] = element.value;
-      setOtp(newOtp);
-
-      // โฟกัสไปที่ช่องถัดไปหากกรอกครบและไม่ใช่ช่องสุดท้าย
-      if (element.nextSibling && element.value) {
-        element.nextSibling.focus();
-      }
-    }
-  };
-
-  // Handle pasting OTP
-  const handlePaste = (e) => {
-    const pasteData = e.clipboardData.getData("Text").trim();
-    const otpDigits = pasteData.split("").slice(0, 6); // Get only the first 6 digits
-    const newOtp = [...otp];
-    otpDigits.forEach((digit, index) => {
-      if (index < 6) {
-        newOtp[index] = digit;
-      }
-    });
-    setOtp(newOtp);
+  const handleChange = (value) => {
+    setOtp(value);
   };
 
   //สร้าง OTP
@@ -44,25 +19,25 @@ export default function Otp() {
 
   const CreateOtp = async () => {
     try {
-      const response = await axios.post(`${URL}/auth/create_otp`, {
-        withCredentials: true,
-        headers: {
-          "Content-Type": "application/json",
-        },
+      const response = await callApi({
+        path: "/auth/create_otp",
+        method: "POST",
+        value: {},
       });
 
-      const data = response.data;
-      if (data) {
-        setOtpRef(data.ref);
-        const waitTime = parseFloat(response.data.time);
+      if (response) {
+        console.log(response);
+        setOtpRef(response.data.ref);
+        const waitTime = parseFloat(response.data.waitingTime);
         setWaitingTime(waitTime);
       }
     } catch (error) {
       const errorResponse = error.response;
-      console.error("CreateOtp Error",errorResponse);
+      console.error("CreateOtp Error", errorResponse);
       Swal.fire({
-        title: `${errorResponse.data.message}`,
-        icon: `${errorResponse.data.status}`,
+        icon: error.icon,
+        title: error.message,
+        text: error.error || "",
         confirmButtonText: "ตกลง",
       }).then(() => {
         navigate("/");
@@ -90,6 +65,19 @@ export default function Otp() {
     }
   }, [waitingTime]);
 
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Enter" && otp.length === 6) {
+        verifyOtp();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [otp]);
+
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
@@ -101,16 +89,14 @@ export default function Otp() {
     setOtpRef("กำลังส่ง OTP");
     setWaitingTime(null);
     try {
-      const response = await axios.get(`${URL}/auth/reset_otp`, {
-        withCredentials: true,
-        headers: {
-          "Content-Type": "application/json",
-        },
+      const response = await callApi({
+        path: "/auth/reset_otp",
+        method: "get",
       });
-      const data = response.data;
-      if (data) {
-        setOtpRef(data.ref);
-        const waitTime = parseFloat(response.data.time);
+      console.log(response);
+      if (response) {
+        setOtpRef(response.data.ref);
+        const waitTime = parseFloat(response.data.waitingTime);
         setWaitingTime(waitTime);
       }
     } catch (error) {
@@ -128,21 +114,16 @@ export default function Otp() {
 
   const verifyOtp = async () => {
     try {
-      const response = await axios.post(
-        `${URL}/auth/verify_otp`,
-        {
-          otp: otp.join(""),
+      const response = await callApi({
+        path: "/auth/verify_otp",
+        method: "post",
+        value: {
+          otp: otp,
         },
-        {
-          withCredentials: true,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      console.log("response",response)
+      });
+      console.log("response", response);
       const data = response.data;
-      if (response.status === 200) {
+      if (response.status === "success") {
         if (data.role === "employee") {
           navigate("/dashboard");
         }
@@ -154,18 +135,18 @@ export default function Otp() {
         }
       }
     } catch (error) {
-      const errorResponse = error.response;
-      console.log("errorResponse",errorResponse)
-      if (errorResponse.status === 400) {
+      const errorResponse = error;
+      console.log("errorResponse", errorResponse);
+      if (errorResponse.statusCode === 400) {
         Swal.fire({
-          title: `${errorResponse.data.message}`,
-          icon: `${errorResponse.data.status}`,
+          title: `${errorResponse.message}`,
+          icon: `${errorResponse.icon}`,
           confirmButtonText: "ตกลง",
         });
       } else {
         Swal.fire({
-          title: `${errorResponse.data.message}`,
-          icon: `${errorResponse.data.status}`,
+          title: `${errorResponse.message}`,
+          icon: `${errorResponse.icon}`,
           confirmButtonText: "ตกลง",
         }).then(() => {
           navigate("/");
@@ -173,21 +154,6 @@ export default function Otp() {
       }
     }
   };
-
-  // Handle Enter key press to submit OTP
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === "Enter" && !otp.some((value) => value === "")) {
-        verifyOtp();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [otp]);
 
   return (
     <div className="flex items-center justify-center h-screen w-screen bg-background overflow-hidden">
@@ -205,28 +171,16 @@ export default function Otp() {
           </span>
         </div>
         <div className="flex items-center justify-center flex-col my-12 gap-4 px-5  lg:px-12  ">
-          <div className="flex  w-full gap-2 justify-between">
-            {otp.map((_, index) => (
-              <input
-                key={index}
-                type="text"
-                maxLength={1}
-                className="w-12 aspect-square text-xl text-center border border-gray-300 bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-employee"
-                value={otp[index]}
-                onChange={(e) => handleChange(e.target, index)}
-                onKeyDown={(e) => {
-                  if (
-                    e.key === "Backspace" &&
-                    !otp[index] &&
-                    e.target.previousSibling
-                  ) {
-                    e.target.previousSibling.focus();
-                  }
-                }}
-                onPaste={handlePaste}
-              />
-            ))}
+          <div className="flex justify-center w-full">
+            <Input.OTP
+              size="large"
+              length={6}
+              value={otp}
+              onChange={handleChange}
+              className="w-16 h-16 text-center text-2xl border border-gray-300 rounded"
+            />
           </div>
+
           <div className="flex flex-row w-full items-center justify-between">
             {waitingTime === 0 ? (
               <div>
@@ -261,7 +215,6 @@ export default function Otp() {
             color="primary"
             className="w-full"
             onClick={() => verifyOtp()}
-            disabled={otp.some((value) => value === "")}
           >
             ยืนยัน
           </Button>

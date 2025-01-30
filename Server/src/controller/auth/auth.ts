@@ -9,24 +9,42 @@ import LogoutLogSchema from "../../models/logoutLogSchema";
 
 export const auth = async (req: Request, res: Response) => {
   const { role } = req.body;
-  const authToken = (req.session as any).token;
+  const sessionData = (req.session as any)?.userData;
 
-  console.log("authToken:", authToken);
+  // ตรวจสอบ session หมดอายุหรือไม่มีข้อมูล
+  if (!sessionData) {
+    try {
+      //  บันทึก log การ logout
+      const logoutLog = new LogoutLogSchema({
+        userId: sessionData.id || "unknown",
+        email: sessionData.email || "unknown",
+        reason: "Session หมดอายุ",
+        ip: req.ip || "Unknown IP",
+        logoutAt: new Date(),
+      });
+      await logoutLog.save();
+    } catch (dbError) {
+      console.error("Error logging logout event:", dbError);
+      return res.error(
+        500,
+        "เกิดข้อผิดพลาดในการบันทึกการออกจากระบบ",
+        { error: (dbError as Error).message },
+        null,
+        "error"
+      );
+    }
 
-  // ตรวจสอบว่า token มีค่าหรือไม่
-  if (!authToken) {
     return res.error(
       401,
-      "ไม่พบ token ยืนยันตัวตน",
-      { detail: "กรุณาเข้าสู่ระบบอีกครั้ง" },
-      null,
-      "error"
+      "Session หมดอายุ",
+      "กรุณาเข้าสู่ระบบใหม่",
+      "/login",
+      "warning"
     );
   }
 
   try {
-    // ตรวจสอบ token
-    const user = jwt.verify(authToken, JWT_SECRET) as JwtPayload;
+    const user = sessionData;
 
     if (user.role === role) {
       console.log("User authenticated successfully:", user);
@@ -39,55 +57,19 @@ export const auth = async (req: Request, res: Response) => {
     } else {
       return res.error(
         403,
-        "ระดับสิทธิ์ไม่ถูกต้อง",
-        { detail: "กรุณาตรวจสอบระดับสิทธิ์ของบัญชีคุณ" },
+        "สิทธิ์ไม่ถูกต้อง",
+        { detail: "กรุณาตรวจสอบสิทธิ์ของบัญชีคุณ" },
         null,
         "error"
       );
     }
   } catch (error) {
-    const isTokenExpired =
-      error instanceof jwt.TokenExpiredError ||
-      error instanceof jwt.JsonWebTokenError;
+    console.error("Authentication error:", error);
 
-    if (isTokenExpired) {
-      const user = jwt.decode(authToken) as JwtPayload;
-      if (user) {
-        try {
-          // บันทึก log การ logout
-          const logoutLog = new LogoutLogSchema({
-            userId: user.id,
-            email: user.email,
-            reason: "token หมดอายุ",
-            ip: req.ip || "Unknown IP",
-            logoutAt: new Date(),
-          });
-          await logoutLog.save();
-        } catch (dbError) {
-          const err = dbError as Error;
-          return res.error(
-            500,
-            "เกิดข้อผิดพลาดในบันทึกประวัติการออกจากระบบ",
-            { error: err.message },
-            null,
-            "error"
-          );
-        }
-      }
-      return res.error(
-        401,
-        "Token หมดอายุ",
-        { detail: "กรุณาเข้าสู่ระบบใหม่อีกครั้ง" },
-        "/login",
-        "error"
-      );
-    }
-
-    const err = error as Error;
     return res.error(
       500,
       "เกิดข้อผิดพลาดในการดึงข้อมูลผู้ใช้",
-      { error: err.message },
+      { error: (error as Error).message },
       null,
       "error"
     );

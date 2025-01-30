@@ -13,52 +13,35 @@ import {
 } from "../../utils/constants";
 const User = UserSchema;
 const UserLog = UserLogSchema;
+
 export const changeStatus = async (req: Request, res: Response) => {
   const { userID } = req.body;
-  const authHeader = req.cookies?.token;
+  const authHeader = (req.session as any).userData;
 
   if (!authHeader) {
-    return res.status(401).json({
-      status: "Unauthorized",
-      message: "ไม่พบ token",
-    });
+    return res.error(401, "ไม่พบ token");
   }
 
-  try {
-    const decodedToken = jwt.verify(authHeader, JWT_SECRET) as JwtPayload;
+  const userRole = authHeader.role;
 
+  try {
     if (!userID) {
-      return res.status(400).json({
-        status: "คำขอไม่ถูกต้อง",
-        message: "กรุณาระบุ userID",
-      });
+      return res.error(400, "กรุณาระบุ userID");
     }
 
     const user = await User.findById(userID);
     if (!user) {
-      return res.status(404).json({
-        status: "ไม่พบข้อมูล",
-        message: "ไม่พบผู้ใช้",
-      });
+      return res.error(404, "ไม่พบผู้ใช้");
     }
     if (user.status === "deleted") {
-      return res.status(404).json({
-        status: "ไม่พบข้อมูล",
-        message: "ไม่พบผู้ใช้ที่ถูกลบแล้ว",
-      });
+      return res.error(404, "ไม่พบผู้ใช้ที่ถูกลบแล้ว");
     }
 
-    if (decodedToken.role !== "super_admin" && decodedToken.role !== "admin") {
-      return res.status(403).json({
-        status: "Forbidden",
-        message: "คุณไม่มีสิทธิ์ในการเปลี่ยนสถานะบัญชีนี้",
-      });
+    if (userRole !== "super_admin" && userRole !== "admin") {
+      return res.error(403, "คุณไม่มีสิทธิ์ในการเปลี่ยนสถานะบัญชีนี้");
     }
-    if (decodedToken.role === "admin" && user.role !== "employee") {
-      return res.status(403).json({
-        status: "Forbidden",
-        message: "คุณไม่มีสิทธิ์ในการเปลี่ยนสถานะบัญชีนี้",
-      });
+    if (userRole === "admin" && user.role !== "employee") {
+      return res.error(403, "คุณไม่มีสิทธิ์ในการเปลี่ยนสถานะบัญชีนี้");
     }
 
     const newStatus = user.status === "active" ? "inactive" : "active";
@@ -68,8 +51,8 @@ export const changeStatus = async (req: Request, res: Response) => {
       action: "change_status",
       userId: user._id,
       performedBy: {
-        userId: decodedToken.id,
-        name: decodedToken.fullName,
+        userId: authHeader.id,
+        name: authHeader.fullName,
       },
       changes: {
         status: `${user.status} -> ${newStatus}`,
@@ -86,21 +69,13 @@ export const changeStatus = async (req: Request, res: Response) => {
       newStatus,
       decryptData(user.firstName)
     );
-    return res.status(200).json({
-      status: "Success",
-      message: `เปลี่ยนสถานะผู้ใช้เป็น ${newStatus} สำเร็จ`,
-      data: {
-        firstName: decryptData(user.firstName),
-        newStatus: newStatus,
-      },
+    return res.success(`เปลี่ยนสถานะผู้ใช้เป็น ${newStatus} สำเร็จ`, {
+      firstName: decryptData(user.firstName),
+      newStatus: newStatus,
     });
   } catch (error) {
     const err = error as Error;
-    return res.status(500).json({
-      status: "Error",
-      message: "เกิดข้อผิดพลาดในการเปลี่ยนสถานะผู้ใช้",
-      error: err.message,
-    });
+    return res.error(500, "เกิดข้อผิดพลาดในการเปลี่ยนสถานะผู้ใช้", err.message);
   }
 };
 

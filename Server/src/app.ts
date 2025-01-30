@@ -17,14 +17,16 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: "http://localhost:5173",
     credentials: true,
     exposedHeaders: ["SET-COOKIE"],
   })
 );
+
 app.use(helmet());
 app.use(formatResponse);
 dotenv.config();
+
 app.use(errorHandler);
 const key = process.env.DATABASE_URL as string;
 app.use(

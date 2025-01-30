@@ -8,14 +8,14 @@ declare global {
         message: string,
         data?: any,
         nextStep?: string | null,
-        icon?: "success" | "info"
+        icon?: "success" | "info" | "warning"
       ): void;
       error(
         statusCode: number,
         message: string,
         error?: any,
         nextStep?: string | null,
-        icon?: "error" | "info"
+        icon?: "error" | "info" | "warning"
       ): void;
     }
   }
@@ -26,9 +26,10 @@ function formatResponse(req: Request, res: Response, next: NextFunction) {
     message: string,
     data: any = null,
     nextStep?: string,
-    icon: "success" | "info" = "success"
+    icon: "success" | "info" | "warning" = "success"
   ) => {
     const response: any = {
+      statusCode: 200,
       status: "success",
       icon,
       message,
@@ -47,9 +48,10 @@ function formatResponse(req: Request, res: Response, next: NextFunction) {
     message: string,
     error: any = null,
     nextStep?: string,
-    icon: "error" | "info" = "error"
+    icon: "error" | "info" | "warning" = "error"
   ) => {
     const response: any = {
+      statusCode,
       status: "error",
       icon,
       message,

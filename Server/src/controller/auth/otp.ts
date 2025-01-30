@@ -15,24 +15,12 @@ const User = UserSchema;
 
 export const createOtp = async (req: Request, res: Response) => {
   try {
-    // ตรวจสอบ session token
-    const userId =
-      (req.session as any).token &&
-      (jwt.verify((req.session as any).token, JWT_SECRET) as JwtPayload);
-    if (!userId) {
-      return res.status(403).json({
-        status: "error",
-        message: "ไม่พบ token ยืนยันตัวตน",
-      });
-    }
+    const userId = (req.session as any).userID;
+
+    if (!userId) return res.error(403, "ไม่พบรหัสผู้ใช้", "กรุณาเข้าสู่ระบบ");
 
     const user = await User.findById(userId.id);
-    if (!user) {
-      return res.status(404).json({
-        status: "error",
-        message: "ไม่พบผู้ใช้",
-      });
-    }
+    if (!user) return res.error(404, "ไม่พบผู้ใช้");
 
     const currentTime = Date.now();
     const otpCooldown = 120000; // 2 นาที
@@ -44,12 +32,12 @@ export const createOtp = async (req: Request, res: Response) => {
       const remainingTime = Math.ceil(
         (otpCooldown - (currentTime - user.lastOtpSentTime.getTime())) / 1000
       );
-      return res.status(200).json({
-        status: "waiting",
-        message: `กรุณารออีก ${remainingTime} วินาที`,
-        ref: user.otpREF,
-        time: remainingTime,
-      });
+      return res.success(
+        `กรุณารออีก ${remainingTime} วินาที`,
+        { ref: user.otpREF, waitingTime: remainingTime },
+        null,
+        "info"
+      );
     }
 
     const otp = otpGenerator.generate(6, {
@@ -69,52 +57,36 @@ export const createOtp = async (req: Request, res: Response) => {
 
     user.otp = otp;
     user.otpREF = otpREF;
-    user.otpExpires = Date.now() + 120000; // หมดอายุใน 2 นาที
+    user.otpExpires = currentTime + otpCooldown;
     user.lastOtpSentTime = new Date();
     await user.save();
 
-    return res.status(200).json({
-      status: "success",
-      message: "OTP ถูกส่งไปยังอีเมล",
-      nextStep: "/auth/verify_otp",
-      ref: otpREF,
-    });
+    return res.success(
+      "OTP ถูกส่งไปยังอีเมล",
+      { ref: otpREF, waitingTime: otpCooldown / 1000 },
+      "/auth/verify_otp"
+    );
   } catch (error) {
-    return res.status(500).json({
-      status: "error",
-      message: "เกิดข้อผิดพลาดในการสร้าง OTP",
-      error: (error as Error).message,
-    });
+    return res.error(
+      500,
+      "เกิดข้อผิดพลาดในการสร้าง OTP",
+      (error as Error).message
+    );
   }
 };
 
 export const resetOtp = async (req: Request, res: Response) => {
   try {
-    // ตรวจสอบ session token
-    const userId =
-      (req.session as any).token &&
-      (jwt.verify((req.session as any).token, JWT_SECRET) as JwtPayload);
+    const userId = (req.session as any).userID;
 
-    if (!userId) {
-      return res.status(403).json({
-        status: "error",
-        message: "ไม่พบ token ยืนยันตัวตน",
-      });
-    }
+    if (!userId) return res.error(403, "ไม่พบรหัสผู้ใช้", "กรุณาเข้าสู่ระบบ");
 
     const user = await User.findById(userId.id);
-
-    if (!user) {
-      return res.status(404).json({
-        status: "error",
-        message: "ไม่พบผู้ใช้",
-      });
-    }
+    if (!user) return res.error(404, "ไม่พบผู้ใช้");
 
     const currentTime = Date.now();
     const otpCooldown = 120000; // 2 นาที
 
-    // ตรวจสอบว่าผู้ใช้ยังอยู่ในช่วง cooldown หรือไม่
     if (
       user.lastOtpSentTime &&
       currentTime - user.lastOtpSentTime.getTime() < otpCooldown
@@ -122,15 +94,14 @@ export const resetOtp = async (req: Request, res: Response) => {
       const remainingTime = Math.ceil(
         (otpCooldown - (currentTime - user.lastOtpSentTime.getTime())) / 1000
       );
-      return res.status(200).json({
-        status: "waiting",
-        message: `กรุณารออีก ${remainingTime} วินาทีเพื่อรีเซ็ต OTP ใหม่`,
-        ref: user.otpREF,
-        time: remainingTime,
-      });
+      return res.success(
+        `กรุณารออีก ${remainingTime} วินาที`,
+        { ref: user.otpREF, waitingTime: remainingTime },
+        null,
+        "info"
+      );
     }
 
-    // สร้าง OTP และ OTP reference ใหม่
     const newOtp = otpGenerator.generate(6, {
       upperCaseAlphabets: false,
       lowerCaseAlphabets: false,
@@ -144,32 +115,92 @@ export const resetOtp = async (req: Request, res: Response) => {
       digits: true,
     });
 
-    // ส่ง OTP ไปยังอีเมลของผู้ใช้
     await sendOtpEmail(decryptData(user.email), newOtp, newOtpREF);
 
-    // อัปเดตข้อมูลผู้ใช้
     user.otp = newOtp;
     user.otpREF = newOtpREF;
-    user.otpExpires = Date.now() + otpCooldown;
+    user.otpExpires = currentTime + otpCooldown;
     user.lastOtpSentTime = new Date();
     await user.save();
 
-    return res.status(200).json({
-      status: "success",
-      message: "OTP ใหม่ถูกส่งไปยังอีเมลของคุณ",
-      ref: newOtpREF,
-      time: otpCooldown / 1000, // แปลงเป็นวินาที
-      nextStep: "/auth/verify_otp",
-    });
+    return res.success(
+      "OTP ใหม่ถูกส่งไปยังอีเมลของคุณ",
+      { ref: newOtpREF, waitingTime: otpCooldown / 1000 },
+      "/auth/verify_otp"
+    );
   } catch (error) {
-    return res.status(500).json({
-      status: "error",
-      message: "เกิดข้อผิดพลาดในการรีเซ็ต OTP",
-      error: (error as Error).message,
-    });
+    return res.error(
+      500,
+      "เกิดข้อผิดพลาดในการรีเซ็ต OTP",
+      (error as Error).message
+    );
   }
 };
 
+export const verifyOtp = async (req: Request, res: Response) => {
+  const { otp } = req.body;
+
+  try {
+    const userId = (req.session as any).userID;
+
+    if (!userId) return res.error(403, "ไม่พบ token ยืนยันตัวตน");
+
+    const user = await User.findById(userId.id);
+    if (!user) return res.error(404, "ไม่พบผู้ใช้");
+
+    const currentTime = Date.now();
+
+    if (user.otp !== otp) {
+      await LoginLogSchema.create({
+        userId: user._id,
+        email: decryptData(user.email),
+        success: false,
+        ip: req.ip,
+      });
+      return res.error(400, "OTP ไม่ถูกต้อง", null, null, "warning");
+    }
+
+    if (!user.otpExpires || currentTime > user.otpExpires) {
+      await LoginLogSchema.create({
+        userId: user._id,
+        email: decryptData(user.email),
+        success: false,
+        ip: req.ip,
+      });
+      return res.error(400, "OTP หมดอายุ", null, null, "warning");
+    }
+
+    const userData = {
+      id: user._id,
+      email: decryptData(user.email),
+      role: user.role,
+      name: decryptData(user.firstName),
+      fullName: `${decryptData(user.firstName)} ${decryptData(user.lastName)}`,
+      department: user.department,
+    };
+
+    user.otp = undefined;
+    user.otpREF = undefined;
+    user.otpExpires = undefined;
+    user.lastOtpSentTime = null;
+    await user.save();
+
+    (req.session as any).userData = userData;
+    return res.success(
+      "OTP ถูกต้อง",
+      { role: user.role, waitingTime: 0 },
+      "/dashboard"
+    );
+  } catch (error) {
+    return res.error(
+      500,
+      "เกิดข้อผิดพลาดในการตรวจสอบ OTP",
+      (error as Error).message
+    );
+  }
+};
+
+// ฟังก์ชันส่งอีเมล OTP
 const sendOtpEmail = async (email: string, otp: string, otpREF: string) => {
   const transporter = nodemailer.createTransport({
     service: "gmail",
@@ -182,7 +213,7 @@ const sendOtpEmail = async (email: string, otp: string, otpREF: string) => {
   const mailOptions = {
     from: "Trainify Project <no-reply@trainify.com>",
     to: email,
-    subject: `Trainify OTP Reference: ${otpREF}`,
+    subject: `Trainify OTP`,
     html: `
       <p>รหัสอ้างอิง: ${otpREF}</p>
       <p>รหัส OTP: <strong>${otp}</strong></p>
@@ -194,90 +225,4 @@ const sendOtpEmail = async (email: string, otp: string, otpREF: string) => {
 
   await transporter.sendMail(mailOptions);
   console.log(`OTP ถูกส่งไปยังอีเมล: ${email}`);
-};
-
-export const verifyOtp = async (req: Request, res: Response) => {
-  const { otp } = req.body;
-
-  try {
-    const userId =
-      (req.session as any).token &&
-      (jwt.verify((req.session as any).token, JWT_SECRET) as JwtPayload);
-    if (!userId) {
-      return res.status(403).json({
-        status: "error",
-        message: "ไม่พบ token ยืนยันตัวตน",
-      });
-    }
-
-    const user = await User.findById(userId.id);
-    if (!user) {
-      return res.status(404).json({
-        status: "error",
-        message: "ไม่พบผู้ใช้",
-      });
-    }
-
-    const currentTime = Date.now();
-    if (user.otp !== otp) {
-      await LoginLogSchema.create({
-        userId: user._id,
-        email: decryptData(user.email),
-        success: false,
-        ip: req.ip,
-      });
-      return res.status(400).json({
-        status: "warning",
-        message: "OTP ไม่ถูกต้อง",
-      });
-    }
-
-    if (!user.otpExpires || currentTime > user.otpExpires) {
-      await LoginLogSchema.create({
-        userId: user._id,
-        email: decryptData(user.email),
-        success: false,
-        ip: req.ip,
-      });
-      return res.status(400).json({
-        status: "warning",
-        message: "OTP หมดอายุ",
-      });
-    }
-
-    const token = jwt.sign(
-      {
-        id: user._id,
-        email: decryptData(user.email),
-        role: user.role,
-        name: decryptData(user.firstName),
-        fullName: `${decryptData(user.firstName)} ${decryptData(
-          user.lastName
-        )}`,
-        department: user.department,
-      },
-      JWT_SECRET,
-      { expiresIn: "12h" }
-    );
-
-    user.otp = undefined;
-    user.otpREF = undefined;
-    user.otpExpires = undefined;
-    user.lastOtpSentTime = null;
-    await user.save();
-
-    (req.session as any).token = token;
-    return res.status(200).json({
-      status: "success",
-      message: "OTP ถูกต้อง",
-      role: user.role,
-      nextStep: "/dashboard",
-    });
-  } catch (error) {
-    return res.status(500).json({
-      status: "error",
-      message: "เกิดข้อผิดพลาดในการตรวจสอบ OTP",
-      error: (error as Error).message,
-    });
-  }
 };
