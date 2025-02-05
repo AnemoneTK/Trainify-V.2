@@ -12,7 +12,7 @@ import {
 import Swal from "sweetalert2";
 import callApi from "../utils/axios";
 import PropTypes from "prop-types";
-import moment from "moment";
+import dayjs from "dayjs";
 import { useUser } from "../contexts/UserContext";
 
 const { Option } = Select;
@@ -23,6 +23,7 @@ export default function UserModal({ visible, onClose, data }) {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const isNew = !data;
+  const [department, setDepartment] = useState(null);
 
   const blackData = {
     email: "",
@@ -31,32 +32,48 @@ export default function UserModal({ visible, onClose, data }) {
     titleName: "",
     firstName: "",
     lastName: "",
-    phoneNumber: "",
-    startDate: "",
-    department: "",
+    phone: "",
+    startDate: dayjs(),
+    departmentID: "",
     status: "active",
   };
 
   useEffect(() => {
+    getDepartmentOption();
     if (data) {
       console.log(data);
       form.setFieldsValue({
         ...data,
-        startDate: data.startDate ? moment(data.startDate) : null,
+        startDate: data.startDate ? dayjs(data.startDate) : null,
+        departmentID: data.departmentID._id,
       });
     } else {
       form.resetFields();
     }
   }, [data, form]);
 
+  const getDepartmentOption = async () => {
+    const response = await callApi({
+      path: "/api/users/get_department",
+      method: "get",
+    });
+
+    if (response) {
+      setDepartment(response.data);
+    }
+  };
+
   const handleSave = async () => {
     try {
       setLoading(true);
       const values = await form.validateFields();
+      const updateData = { ...values, userId: data?.userID || "" }; // 🔹 เพิ่ม userId อย่างถูกต้อง
+      console.log("updateData", updateData);
+
       const response = await callApi({
-        path: isNew ? "/api/users/create" : `/api/users/update/${data?.id}`,
-        method: isNew ? "post" : "put",
-        value: { ...values },
+        path: isNew ? "/api/users/create" : `/api/users/edit_user`,
+        method: isNew ? "post" : "patch",
+        value: updateData,
       });
 
       if (response.statusCode === 200) {
@@ -67,7 +84,7 @@ export default function UserModal({ visible, onClose, data }) {
       }
     } catch (error) {
       console.error(error);
-      message.error("เกิดข้อผิดพลาด");
+      message.error(error.message || "เกิดข้อผิดพลาด");
     } finally {
       setLoading(false);
     }
@@ -88,7 +105,7 @@ export default function UserModal({ visible, onClose, data }) {
       if (result.isConfirmed) {
         try {
           const response = await callApi({
-            path: `/api/users/delete/${data?.id}`,
+            path: `/api/users/delete/${data?.userID}`,
             method: "delete",
           });
 
@@ -136,28 +153,22 @@ export default function UserModal({ visible, onClose, data }) {
         >
           <Input disabled={!isNew} />
         </Form.Item>
-        <Form.Item name="role" label="Role" rules={[{ required: true }]}>
-          <Select>
-            <Option value="admin">Admin</Option>
-            <Option value="employee">Employee</Option>
-            {userData?.role === "super_admin" ? (
-              <Option value="user">User</Option>
-            ) : null}
-          </Select>
-        </Form.Item>
-        <Form.Item
-          name="nationalId"
-          label="รหัสประจำตัวประชาชน"
-          rules={[{ required: true, message: "กรุณากรอกข้อมูลให้ครบถ้วน" }]}
-        >
-          <Input />
-        </Form.Item>
+
+        {isNew && (
+          <Form.Item
+            name="nationalId"
+            label="รหัสประจำตัวประชาชน"
+            rules={[{ required: true, message: "กรุณากรอกข้อมูลให้ครบถ้วน" }]}
+          >
+            <Input type="number" maxLength={13} />
+          </Form.Item>
+        )}
         <div className="flex flex-col md:flex-row justify-between">
-          <Form.Item name="titleName" label="คำนำหน้า">
+          <Form.Item name="titleName" label="คำนำหน้า" className="md:w-1/5">
             <Select>
               <Option value="">ไม่ระบุ</Option>
               <Option value="นาย">นาย</Option>
-              <Option value="นาย">นาย</Option>
+              <Option value="นาง">นาง</Option>
               <Option value="นางสาว">นางสาว</Option>
               <Option value="อื่นๆ">อื่นๆ</Option>
             </Select>
@@ -178,36 +189,49 @@ export default function UserModal({ visible, onClose, data }) {
           </Form.Item>
         </div>
         <Form.Item
-          name="phoneNumber"
+          name="phone"
           label="เบอร์โทรศัพท์"
           rules={[{ required: true, message: "กรุณากรอกข้อมูลให้ครบถ้วน" }]}
         >
-          <Input />
+          <Input type="number" maxLength={10} />
         </Form.Item>
         <Form.Item name="startDate" label="วันที่เริ่มงาน">
-          <DatePicker style={{ width: "100%" }} />
+          <DatePicker style={{ width: "100%" }} format={"DD/MM/YYYY"} />
         </Form.Item>
         <Form.Item
-          name="department"
+          name="departmentID"
           label="แผนก"
           rules={[{ required: true, message: "กรุณากรอกข้อมูลให้ครบถ้วน" }]}
         >
           <Select>
             <Option value="">ไม่ระบุ</Option>
-            <Option value="นาย">นาย</Option>
-            <Option value="นาง">นาง</Option>
-            <Option value="นางสาว">นางสาว</Option>
-            <Option value="อื่นๆ">อื่นๆ</Option>
+            {department?.length > 0 &&
+              department?.map((dep) => (
+                <Option key={dep._id} value={dep._id}>
+                  {dep.name}
+                </Option>
+              ))}
           </Select>
         </Form.Item>
-        <Form.Item name="status" label="สถานะ">
-          <Radio.Group>
-            <Radio value="active">เปิดใช้งาน</Radio>
-            <Radio value="inactive">ปิดการใช้งาน</Radio>
-          </Radio.Group>
-        </Form.Item>
-
         <div className="flex justify-between gap-2 ">
+          <Form.Item name="role" label="Role" rules={[{ required: true }]}>
+            <Radio.Group>
+              <Radio value="employee">พนักงาน</Radio>
+              <Radio value="admin">ผู้ดูแล</Radio>
+              {userData?.role === "super_admin" ? (
+                <Radio value="super_admin">ผู้ดูแลระบบ</Radio>
+              ) : null}
+            </Radio.Group>
+          </Form.Item>
+          <Form.Item name="status" label="สถานะ">
+            <Radio.Group>
+              <Radio value="active">เปิดใช้งาน</Radio>
+              <Radio value="inactive">ปิดการใช้งาน</Radio>
+            </Radio.Group>
+          </Form.Item>
+        </div>
+
+        <div className="flex justify-between  ">
           {!isNew && (
             <Button danger onClick={handleDelete}>
               ลบผู้ใช้
@@ -231,15 +255,16 @@ UserModal.propTypes = {
   visible: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   data: PropTypes.shape({
-    id: PropTypes.string,
+    userID: PropTypes.string,
     email: PropTypes.string,
     role: PropTypes.string,
     nationalId: PropTypes.string,
     titleName: PropTypes.string,
     firstName: PropTypes.string,
     lastName: PropTypes.string,
-    phoneNumber: PropTypes.string,
+    phone: PropTypes.string,
     startDate: PropTypes.string,
+    departmentID: PropTypes.object,
     department: PropTypes.string,
     status: PropTypes.string,
   }),

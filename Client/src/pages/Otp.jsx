@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Input, Button } from "antd";
 import callApi from "../utils/axios";
 import Swal from "sweetalert2";
@@ -6,9 +6,9 @@ import { useNavigate } from "react-router-dom";
 
 export default function Otp() {
   const navigate = useNavigate();
-
+  const otpRequested = useRef(false);
   const [otp, setOtp] = useState("");
-
+  const [isOtpRequested, setIsOtpRequested] = useState(false);
   const handleChange = (value) => {
     setOtp(value);
   };
@@ -17,36 +17,11 @@ export default function Otp() {
   const [otpRef, setOtpRef] = useState("");
   const [waitingTime, setWaitingTime] = useState(null);
 
-  const CreateOtp = async () => {
-    try {
-      const response = await callApi({
-        path: "/auth/create_otp",
-        method: "POST",
-        value: {},
-      });
-
-      if (response) {
-        console.log(response);
-        setOtpRef(response.data.ref);
-        const waitTime = parseFloat(response.data.waitingTime);
-        setWaitingTime(waitTime);
-      }
-    } catch (error) {
-      const errorResponse = error.response;
-      console.error("CreateOtp Error", errorResponse);
-      Swal.fire({
-        icon: error.icon,
-        title: error.message,
-        text: error.error || "",
-        confirmButtonText: "ตกลง",
-      }).then(() => {
-        navigate("/");
-      });
-    }
-  };
-
   useEffect(() => {
-    CreateOtp();
+    if (!otpRequested.current) {
+      otpRequested.current = true;
+      CreateOtp();
+    }
   }, []);
 
   useEffect(() => {
@@ -83,7 +58,35 @@ export default function Otp() {
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds.toString().padStart(2, "0")}`; // แสดงผลในรูปแบบ นาที:วินาที
   };
+  const CreateOtp = async () => {
+    if (isOtpRequested) return; // ป้องกันการเรียกซ้ำ
+    setIsOtpRequested(true);
+    try {
+      const response = await callApi({
+        path: "/auth/create_otp",
+        method: "POST",
+        value: {},
+      });
 
+      if (response) {
+        console.log(response);
+        setOtpRef(response.data.ref);
+        const waitTime = parseFloat(response.data.waitingTime);
+        setWaitingTime(waitTime);
+      }
+    } catch (error) {
+      const errorResponse = error.response;
+      console.error("CreateOtp Error", errorResponse);
+      Swal.fire({
+        icon: error.icon,
+        title: error.message,
+        text: error.error || "",
+        confirmButtonText: "ตกลง",
+      }).then(() => {
+        navigate("/");
+      });
+    }
+  };
   // Reset OTP
   const resetOtp = async () => {
     setOtpRef("กำลังส่ง OTP");

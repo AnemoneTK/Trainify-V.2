@@ -1,6 +1,7 @@
-import { Table, Tabs } from "antd";
+import { Tabs } from "antd";
 
 import EmpList from "./EmpList";
+import CourseList from "./CourseList";
 export default function Dashboard() {
   return (
     <div className="p-5 ">
@@ -9,13 +10,10 @@ export default function Dashboard() {
         <Tabs.TabPane tab="รายชื่อพนักงาน" key="1">
           <EmpList />
         </Tabs.TabPane>
-        <Tabs.TabPane tab="บัญชีที่ถูกปิดการใช้งาน" key="2">
-          <Table />
+        <Tabs.TabPane tab="หลักสูตรฝึกอบรม" key="2">
+          <CourseList />
         </Tabs.TabPane>
-        <Tabs.TabPane tab="หลักสูตรฝึกอบรม" key="3">
-          <p>หน้าหลักสูตรอยู่ที่นี่...</p>
-        </Tabs.TabPane>
-        <Tabs.TabPane tab="หลักสูตรรอการอนุมัติ" key="4">
+        <Tabs.TabPane tab="หลักสูตรรอการอนุมัติ" key="3">
           <p>หน้าหลักสูตรอยู่ที่นี่...</p>
         </Tabs.TabPane>
       </Tabs>

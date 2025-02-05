@@ -12,6 +12,7 @@ import Swal from "sweetalert2";
 import { useUser } from "../../../contexts/UserContext";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { TbFileExport } from "react-icons/tb";
 import dayjs from "dayjs";
 import "dayjs/locale/th";
 import buddhistEra from "dayjs/plugin/buddhistEra";
@@ -20,44 +21,27 @@ dayjs.locale("th");
 import callApi from "../../../utils/axios";
 import UserModal from "../../../components/UserModal";
 
-export default function EmpList() {
+export default function CourseList() {
   const { userData } = useUser();
   const navigate = useNavigate();
 
   const [spinning, setSpinning] = useState(false);
   const [spinningStatus, setSpinningStatus] = useState(false);
   const [users, setUsers] = useState(null);
-  const [filteredUsers, setFilteredUsers] = useState(users);
+
   const [selectedUser, setSelectedUser] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
-
-  const [search, setSearch] = useState("");
 
   useEffect(() => {
     if (users) {
       console.log("users", users);
     }
   }, [users]);
-
   useEffect(() => {
     if (userData) {
       get_users();
     }
   }, [userData]);
-
-  useEffect(() => {
-    if (search) {
-      setFilteredUsers(
-        users.filter(
-          (user) =>
-            user.firstName.toLowerCase().includes(search.toLowerCase()) ||
-            user.lastName.toLowerCase().includes(search.toLowerCase())
-        )
-      );
-    } else {
-      setFilteredUsers(users); // ถ้าไม่พิมพ์คำค้นหา แสดงทั้งหมด
-    }
-  }, [search, users]);
 
   const get_users = async () => {
     try {
@@ -167,10 +151,7 @@ export default function EmpList() {
         <div className="flex flex-row md:flex-row items-end justify-between">
           <div>
             <div className="text-2xl font-bold">
-              พนักงาน ({users?.length || 0})
-            </div>
-            <div className="text-md hidden md:block">
-              บัญชีผู้ใช้งาน - พนักงาน (Employee)
+              หลักสูตร ({users?.length || 0})
             </div>
           </div>
           <div>
@@ -182,14 +163,14 @@ export default function EmpList() {
         </div>
         <div className="flex flex-col shadow-md  bg-white rounded-lg mt-5 max-h-[70dvh]">
           <div className="search flex flex-row items-center justify-between p-4">
-            <div className="w-1/5">
-              <Input
-                prefix={<CiSearch />}
-                onChange={(e) => setSearch(e.target.value)}
-              />
+            <div className="w-1/6">
+              <Input prefix={<CiSearch />} />
             </div>
             <div>
-              <Button>ตั้งค่าอื่นๆ</Button>
+              <Button>
+                <TbFileExport className="text-lg" />
+                ส่งออกข้อมูล
+              </Button>
             </div>
           </div>
           <div>
@@ -205,7 +186,7 @@ export default function EmpList() {
                     : false
                 }
                 sticky={true}
-                dataSource={filteredUsers || []}
+                dataSource={users || []}
                 showSorterTooltip={{
                   target: "full-header",
                 }}
