@@ -1,83 +1,71 @@
-import {
-  Request,
-  Response,
-  jwt,
-  JwtPayload,
-  UserSchema,
-  CourseSchema,
-  decryptData,
-  JWT_SECRET,
-} from "../../utils/constants";
-import upload from "../../middlewares/upload"; // import multer middleware
-
+import { Request, Response, CourseSchema } from "../../utils/constants";
 const Course = CourseSchema;
 
 export const getCourse = async (req: Request, res: Response) => {
-  const { courseID, type, status, startTimes, endTimes } = req.body;
-  const authHeader = req.cookies.token;
-
-  // ตรวจสอบ token ใน cookies
-  if (!authHeader) {
-    return res.status(401).json({
-      status: "Unauthorized",
-      message: "ไม่พบ token",
-    });
-  }
-
   try {
-    const decodedToken = jwt.verify(authHeader, JWT_SECRET) as JwtPayload;
-    if (!decodedToken) {
-      return res.status(403).json({
-        status: "No User",
-        message: "ไม่พบผู้ใช้งาน",
-      });
+    // ใช้ session แทน JWT
+    const sessionData = (req.session as any)?.userData;
+    if (!sessionData) {
+      return res.error(401, "Session หมดอายุ กรุณาเข้าสู่ระบบใหม่");
     }
 
-    // สร้างตัวกรองสำหรับ query
+    // ✅ กำหนดค่าเริ่มต้นให้พารามิเตอร์
+    const {
+      courseID = null,
+      type = null,
+      status = null,
+      startTimes = null,
+      endTimes = null,
+    } = req.body || {}; // ป้องกันกรณี req.body เป็น undefined
+
+    // ✅ ปรับ `filter` ให้รองรับทุกกรณี
     const filter: any = {};
 
-    // เพิ่มเงื่อนไขการกรองตามข้อมูลที่ได้รับ
-    if (courseID !== 0) {
+    if (courseID) {
       filter._id = courseID;
     }
-    if (type !== "") {
+    if (type) {
       filter.type = type;
     }
-    if (status !== "" && decodedToken.role !== "employee") {
-      filter.status = status;
-    } else {
-      filter.status = "public";
-    }
 
-    if (startTimes !== "" || endTimes !== "") {
-      filter["schedule.times.start"] = startTimes
-        ? { $gte: new Date(startTimes) }
-        : undefined;
-      filter["schedule.times.end"] = endTimes
-        ? { $lte: new Date(endTimes) }
-        : undefined;
-    }
-
-    // ลบเงื่อนไขที่เป็น undefined ออกจาก filter
-    Object.keys(filter).forEach((key) => {
-      if (filter[key] === undefined) {
-        delete filter[key];
+    // ✅ ตรวจสอบสิทธิ์ก่อนตั้งค่า filter สถานะ
+    if (status) {
+      if (sessionData.role === "admin") {
+        filter.status = status;
+      } else {
+        filter.status = "public"; // พนักงานเห็นเฉพาะ public
       }
-    });
+    }
 
-    // ค้นหาคอร์สตาม filter
-    const course = await Course.find(filter);
+    // ✅ ถ้าไม่ส่ง status มาเลย (รวมทุกสถานะ)
+    if (!status && sessionData.role === "admin") {
+      delete filter.status;
+    }
 
-    res.status(200).json({
-      status: "ok",
-      count: course.length,
-      data: course,
+    // ✅ ตรวจสอบช่วงเวลา
+    if (startTimes || endTimes) {
+      filter["schedule.date"] = {};
+      if (startTimes) filter["schedule.date"].$gte = new Date(startTimes);
+      if (endTimes) filter["schedule.date"].$lte = new Date(endTimes);
+
+      // ✅ ลบ filter ถ้าไม่มีการกำหนดช่วงเวลา
+      if (Object.keys(filter["schedule.date"]).length === 0) {
+        delete filter["schedule.date"];
+      }
+    }
+
+    // ✅ ค้นหาคอร์สตาม filter (หรือทั้งหมดถ้าไม่มีเงื่อนไข)
+    const courses = await Course.find(filter);
+
+    return res.success("ดึงข้อมูลคอร์สสำเร็จ", {
+      count: courses.length,
+      data: courses,
     });
   } catch (error) {
-    return res.status(500).json({
-      status: "error",
-      message: "เกิดข้อผิดพลาดในการดึงข้อมูลคอร์ส",
-      error: (error as Error).message,
-    });
+    return res.error(
+      500,
+      "เกิดข้อผิดพลาดในการดึงข้อมูลคอร์ส",
+      (error as Error).message
+    );
   }
 };

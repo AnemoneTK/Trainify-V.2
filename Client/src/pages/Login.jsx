@@ -59,6 +59,8 @@ export default function Login() {
         navigate("/otp");
       }
     } catch (error) {
+      console.log("error", error);
+
       Swal.fire({
         icon: error.icon,
         title: error.message,

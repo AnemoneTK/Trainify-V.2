@@ -27,14 +27,14 @@ export const createUser = async (req: Request, res: Response) => {
     status,
   } = req.body;
 
-  const authHeader = (req.session as any)?.token;
+  const authHeader = (req.session as any)?.userData;
   if (!authHeader) {
     return res.error(401, "ไม่พบ token");
   }
 
+  const userRole = authHeader.role;
   try {
-    const decodedToken = jwt.verify(authHeader, JWT_SECRET) as JwtPayload;
-    if (!["admin", "super_admin"].includes(decodedToken.role)) {
+    if (!["admin", "super_admin"].includes(userRole)) {
       return res.error(403, "คุณไม่มีสิทธิ์ในการสร้างบัญชีผู้ใช้");
     }
 
@@ -92,15 +92,15 @@ export const createUser = async (req: Request, res: Response) => {
     const hashedPassword = await bcrypt.hash(nationalId, 10);
 
     const newStatus =
-      decodedToken.role === "admin" && role === "admin" ? "inactive" : status;
+      userRole === "admin" && role === "admin" ? "inactive" : status;
 
     const confirmedBy =
       role === "employee" ||
-      (decodedToken.role === "super_admin" &&
+      (userRole === "super_admin" &&
         (role === "admin" || role == "super_admin"))
         ? {
-            userId: decodedToken.id,
-            name: decodedToken.fullName,
+            userId: authHeader.id,
+            name: authHeader.fullName,
           }
         : null;
 
@@ -117,8 +117,8 @@ export const createUser = async (req: Request, res: Response) => {
       department,
       status: newStatus,
       createdBy: {
-        userId: decodedToken.id,
-        name: decodedToken.fullName,
+        userId: authHeader.id,
+        name: authHeader.fullName,
       },
       confirmedBy,
     });
@@ -129,14 +129,13 @@ export const createUser = async (req: Request, res: Response) => {
       action: "create",
       userId: savedUser._id,
       performedBy: {
-        userId: decodedToken.id,
-        name: decodedToken.fullName,
+        userId: authHeader.id,
+        name: authHeader.fullName,
       },
     });
 
     return res.success(
-      role === "employee" ||
-        (decodedToken.role === "super_admin" && role === "admin")
+      role === "employee" || (userRole === "super_admin" && role === "admin")
         ? "สร้างบัญชีผู้ใช้สำเร็จ"
         : "สร้างบัญชีผู้ใช้สำเร็จ กรุณารอการยืนยันจากผู้ดูแล",
       { user: savedUser }

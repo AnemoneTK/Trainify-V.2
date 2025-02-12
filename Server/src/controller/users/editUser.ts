@@ -1,76 +1,79 @@
-import {
-  Request,
-  Response,
-  jwt,
-  JwtPayload,
-  UserSchema,
-  UserLogSchema,
-  JWT_SECRET,
-  encryptData,
-} from "../../utils/constants";
+import { Request, Response } from "express";
+import userLogSchema from "../../models/userLogSchema";
+import userSchema from "../../models/userSchema";
+import { encryptData } from "../../utils/constants";
 import { Types } from "mongoose";
 
-const User = UserSchema;
-const UserLog = UserLogSchema;
+const User = userSchema;
+const UserLog = userLogSchema;
 
-interface UserDocument extends Document {
-  firstName: string;
-  lastName: string;
-  phoneNumber: string;
-  department: Types.ObjectId;
-  status: string;
-  createdAt: Date;
-  updatedAt: Date;
+interface UserDocument {
+  titleName?: string;
+  firstName?: string;
+  lastName?: string;
+  phoneNumber?: string;
+  department?: Types.ObjectId;
+  role?: string;
+  status?: string;
 }
 
 export const editUser = async (req: Request, res: Response) => {
-  const { userId, firstName, lastName, phoneNumber, department } = req.body; // ข้อมูลที่จะแก้ไข
+  const {
+    userId,
+    titleName,
+    firstName,
+    lastName,
+    phoneNumber,
+    departmentID,
+    role,
+    status,
+  } = req.body;
 
-  const authHeader = req.cookies?.token;
-  if (!authHeader) {
-    return res.status(401).json({
-      status: "Unauthorized",
-      message: "ไม่พบ token",
-    });
+  const sessionData = req.session as any;
+  if (!sessionData || !sessionData.userData) {
+    return res.error(401, "ไม่พบข้อมูลผู้ใช้", "กรุณาเข้าสู่ระบบใหม่");
+  }
+
+  const {
+    id: currentUserId,
+    role: currentUserRole,
+    fullName,
+  } = sessionData.userData;
+
+  if (!userId) {
+    return res.error(400, "คำขอไม่ถูกต้อง", "กรุณาระบุ userId ที่ต้องการแก้ไข");
   }
 
   try {
-    const decodedToken = jwt.verify(authHeader, JWT_SECRET) as JwtPayload;
-    const currentUserId = decodedToken.id;
-    const currentUserRole = decodedToken.role;
-
-    if (!userId) {
-      return res.status(400).json({
-        status: "Error",
-        message: "กรุณาระบุ userId ที่ต้องการแก้ไข",
-      });
-    }
-
-    // ตรวจสอบสิทธิ์
     const userToUpdate = await User.findById(userId);
     if (!userToUpdate) {
-      return res.status(404).json({
-        status: "Error",
-        message: "ไม่พบผู้ใช้ที่ต้องการแก้ไข",
-      });
+      return res.error(404, "ไม่พบข้อมูล", "ไม่พบผู้ใช้ที่ต้องการแก้ไข");
     }
 
-    if (
-      (currentUserRole === "admin" && userToUpdate.role !== "employee") ||
-      (currentUserRole !== "super_admin" && currentUserRole !== "admin")
-    ) {
-      return res.status(403).json({
-        status: "Forbidden",
-        message: "คุณไม่มีสิทธิ์ในการแก้ไขข้อมูลผู้ใช้นี้",
-      });
+    if (currentUserRole === "admin" && userToUpdate.role !== "employee") {
+      return res.error(403, "ไม่มีสิทธิ์", "คุณไม่มีสิทธิ์ในการแก้ไขบัญชีนี้");
     }
 
-    // เตรียมข้อมูลที่จะอัปเดต (ไม่ใช้ UserDocument)
-    const updatedData: Partial<UserDocument> = {}; // ใช้ Partial<UserDocument>
+    if (currentUserRole === "admin" && role === "super_admin") {
+      return res.error(
+        403,
+        "ไม่มีสิทธิ์",
+        "คุณไม่สามารถเปลี่ยนบัญชีให้เป็น super_admin ได้"
+      );
+    }
+
+    // เตรียมข้อมูลที่จะอัปเดต
+    const updatedData: Partial<UserDocument> = {};
+    if (titleName) updatedData.titleName = titleName;
     if (firstName) updatedData.firstName = encryptData(firstName);
     if (lastName) updatedData.lastName = encryptData(lastName);
     if (phoneNumber) updatedData.phoneNumber = encryptData(phoneNumber);
-    if (department) updatedData.department = department;
+    if (departmentID) updatedData.department = departmentID;
+    if (status) updatedData.status = status;
+
+    if (role && currentUserRole === "super_admin") {
+      updatedData.role = role;
+    }
 
     // อัปเดตข้อมูลผู้ใช้
     const updatedUser = await User.findByIdAndUpdate(userId, updatedData, {
@@ -78,36 +81,25 @@ export const editUser = async (req: Request, res: Response) => {
     });
 
     if (!updatedUser) {
-      return res.status(404).json({
-        status: "Error",
-        message: "ไม่พบผู้ใช้ที่ต้องการแก้ไข",
-      });
+      return res.error(404, "ไม่พบข้อมูล", "ไม่พบผู้ใช้ที่ต้องการแก้ไข");
     }
 
     // บันทึกประวัติการแก้ไข
-    const log = new UserLog({
+    await UserLog.create({
       action: "update",
       userId: updatedUser._id,
       performedBy: {
         userId: currentUserId,
-        name: decodedToken.fullName,
+        name: fullName,
       },
       changes: updatedData,
       timestamp: new Date(),
     });
-    await log.save();
 
-    return res.status(200).json({
-      status: "Success",
-      message: "แก้ไขข้อมูลผู้ใช้สำเร็จ",
-    });
+    return res.success("แก้ไขข้อมูลผู้ใช้สำเร็จ", updatedUser);
   } catch (error) {
     const err = error as Error;
-    console.error("Error during edit user:", error);
-    return res.status(500).json({
-      status: "Error",
-      message: "เกิดข้อผิดพลาดในการแก้ไขข้อมูลผู้ใช้",
-      error: err.message,
-    });
+    console.error("Error during edit user:", err);
+    return res.error(500, "เกิดข้อผิดพลาด", err.message);
   }
 };

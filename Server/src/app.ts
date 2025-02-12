@@ -20,6 +20,7 @@ app.use(
     origin: "http://localhost:5173",
     credentials: true,
     exposedHeaders: ["SET-COOKIE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
@@ -55,8 +56,18 @@ app.use(
     });
   }
 );
-
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", (req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Origin, Content-Type, Accept");
+  next();
+});
+app.use(
+  "/uploads",
+  express.static(path.join(__dirname, "uploads"), {
+    extensions: ["jpg", "jpeg", "png"],
+  })
+);
 dotenv.config();
 
 app.use("/api/users", usersRoutes);

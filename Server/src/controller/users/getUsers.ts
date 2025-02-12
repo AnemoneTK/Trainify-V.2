@@ -25,11 +25,12 @@ export const getUsers = async (req: Request, res: Response) => {
       return users.map((user) => ({
         userID: user._id,
         email: decryptData(user.email),
-        titleName: user.titleName,
+        titleName: user.titleName || "",
         firstName: decryptData(user.firstName),
         lastName: decryptData(user.lastName),
         phone: decryptData(user.phoneNumber),
         role: user.role,
+        departmentID: user.department,
         department:
           typeof user.department === "object" && "name" in user.department
             ? user.department.name

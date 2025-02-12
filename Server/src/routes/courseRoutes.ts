@@ -7,6 +7,12 @@ import { registerCourse } from "../controller/course/registerCourse";
 import { getCourseRegistrations } from "../controller/course/getCourseRegis";
 import { confirmTrainingResults } from "../controller/course/confirmResults";
 import { getAvailableCourses } from "../controller/course/getCourseOpen";
+import {
+  createTag,
+  getTags,
+  updateTag,
+  deleteTag,
+} from "../controller/course/tagController";
 const router = express.Router();
 
 router.post("/create", createCourse);
@@ -17,5 +23,8 @@ router.post("/register", registerCourse);
 router.post("/course_register_details", getCourseRegistrations);
 router.post("/confirm_result", confirmTrainingResults);
 router.get("/available_courses", getAvailableCourses);
+router.post("/tag/create", createTag);
+router.get("/tag/gets", getTags);
+router.post("/tag/update", updateTag);
 
 export default router;

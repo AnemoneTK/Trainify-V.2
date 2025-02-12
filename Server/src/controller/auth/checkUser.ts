@@ -87,34 +87,44 @@ export const checkUser = async (req: Request, res: Response) => {
 
 export const logoutUser = async (req: Request, res: Response) => {
   try {
-    const token = (req.session as any).token;
+    const sessionData = req.session as any;
+    let userId, role, email, reason;
 
-    if (!token || typeof token !== "string") {
-      return res.error(401, "ไม่พบ token หรือ token ไม่ถูกต้อง");
+    // ✅ ตรวจสอบว่า session ยังอยู่หรือไม่
+    if (sessionData.userData) {
+      // ✅ Session ยังอยู่ → ใช้ข้อมูลจาก session
+      ({ id: userId, role, email } = sessionData.userData);
+      reason = "ออกจากระบบปกติ";
+    } else {
+      // ❌ Session หมดอายุ → พยายามดึง userId จาก Cookie (ถ้ามี)
+      const userToken = req.cookies?.userToken; // ต้องแน่ใจว่าเก็บ Token ก่อนหน้านี้
+      if (userToken) {
+        try {
+          const decodedToken = JSON.parse(userToken);
+          userId = decodedToken.id;
+          role = decodedToken.role;
+          email = decodedToken.email;
+          reason = "Session หมดอายุ";
+        } catch (error) {
+          console.warn("❌ ไม่สามารถถอดรหัส userToken ได้:", error);
+        }
+      }
     }
 
-    let decodedToken: JwtPayload | null = null;
-    let reason = "ออกจากระบบ";
-
-    try {
-      decodedToken = jwt.verify(token, JWT_SECRET) as JwtPayload;
-      console.log("✅ Token Verified:", decodedToken);
-    } catch (error) {
-      reason = "token หมดอายุ";
-      decodedToken = jwt.decode(token) as JwtPayload;
-      console.log("⚠️ Token Expired:", decodedToken);
+    // ❌ ถ้ายังไม่สามารถดึง userId ได้ → ตอบกลับโดยไม่บันทึก log
+    if (!userId) {
+      return res.error(
+        401,
+        "Session หมดอายุ",
+        "ไม่พบข้อมูลผู้ใช้ กรุณาเข้าสู่ระบบใหม่"
+      );
     }
-
-    if (!decodedToken || !decodedToken.id || !decodedToken.role) {
-      return res.error(401, "Token ไม่ถูกต้อง");
-    }
-
-    const { id: userId, role, email } = decodedToken;
 
     const userIp = req.ip || req.headers["x-forwarded-for"] || "Unknown IP";
+
     console.log("🔹 User Logout:", { userId, role, reason, ip: userIp });
 
-    // บันทึก Log การออกจากระบบ
+    // ✅ บันทึก Log การออกจากระบบ
     await LogoutLogSchema.create({
       userId,
       role,
@@ -124,7 +134,7 @@ export const logoutUser = async (req: Request, res: Response) => {
       logoutAt: new Date().toISOString(), // ใช้รูปแบบ ISO Date
     });
 
-    // แปลง `req.session.destroy()` ให้เป็น Promise-based function
+    // ✅ แปลง `req.session.destroy()` ให้เป็น Promise-based function
     const destroySession = () =>
       new Promise<void>((resolve, reject) => {
         req.session.destroy((err) => {
@@ -135,7 +145,7 @@ export const logoutUser = async (req: Request, res: Response) => {
 
     await destroySession();
 
-    return res.success("Logout สำเร็จ");
+    return res.success("ออกจากระบบสำเร็จ");
   } catch (error) {
     console.error("❌ Logout Error:", error);
     return res.error(
