@@ -1,5 +1,9 @@
 import { Request, Response } from "express";
 import upload from "../../middlewares/upload"; // Import multer configuration
+import fs from "fs";
+import path from "path";
+import { CourseSchema } from "../../utils/constants";
+const Course = CourseSchema;
 
 export const uploadBanner = [
   upload.single("banner"),
@@ -33,3 +37,53 @@ export const uploadBanner = [
     }
   },
 ];
+
+export const deleteBanner = async (req: Request, res: Response) => {
+  try {
+    // ตรวจสอบ session
+    const sessionData = (req.session as any)?.userData;
+    if (!sessionData) {
+      return res.error(401, "Session หมดอายุ กรุณาเข้าสู่ระบบใหม่");
+    }
+
+    // ตรวจสอบสิทธิ์เฉพาะ Admin เท่านั้น
+    if (sessionData.role !== "admin") {
+      return res.error(403, "คุณไม่มีสิทธิ์ในการลบแบนเนอร์");
+    }
+
+    // ดึง courseID และ bannerUrl จาก request body
+    const { courseID } = req.body;
+    if (!courseID) {
+      return res.error(400, "กรุณาระบุ courseID");
+    }
+
+    const course = await Course.findById(courseID);
+    if (!course) {
+      return res.error(404, "ไม่พบหลักสูตร");
+    }
+
+    const bannerUrl = course.banner;
+    if (!bannerUrl) {
+      return res.error(404, "ไม่พบแบนเนอร์");
+    }
+
+    // ลบไฟล์แบนเนอร์จากระบบไฟล์ (เช่น: /uploads/banners)
+    const filePath = path.join(__dirname, "../../", bannerUrl);
+    fs.unlink(filePath, (err) => {
+      if (err) {
+        return res.error(500, "ไม่สามารถลบไฟล์ได้");
+      }
+      // อัปเดตค่าในฐานข้อมูลให้เป็นค่าว่าง
+      course.banner = "";
+      course.save();
+
+      return res.success("ลบแบนเนอร์สำเร็จ");
+    });
+  } catch (error) {
+    return res.error(
+      500,
+      "เกิดข้อผิดพลาดในการลบแบนเนอร์",
+      (error as Error).message
+    );
+  }
+};

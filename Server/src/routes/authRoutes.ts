@@ -1,4 +1,3 @@
-// routes/userRoutes.ts
 import express from "express";
 import { checkUser, logoutUser } from "../controller/auth/checkUser";
 import { createOtp, verifyOtp, resetOtp } from "../controller/auth/otp";

@@ -1,76 +1,59 @@
-import {
-  Request,
-  Response,
-  jwt,
-  JwtPayload,
-  UserSchema,
-  CourseSchema,
-  decryptData,
-  JWT_SECRET,
-} from "../../utils/constants";
-
+import { Request, Response, CourseSchema } from "../../utils/constants";
 import RegisterSchema from "../../models/registrationSchema";
-const User = UserSchema;
+
 const Course = CourseSchema;
 const Registration = RegisterSchema;
+
 export const getCourseRegistrations = async (req: Request, res: Response) => {
   const { courseId } = req.body;
 
   if (!courseId) {
-    return res.status(400).json({
-      status: "Error",
-      message: "กรุณาระบุ courseId",
-    });
+    return res.error(400, "กรุณาระบุ courseId");
   }
 
   try {
-    // ค้นหาหลักสูตร
+    // ค้นหาหลักสูตรจาก courseId
     const course = await Course.findById(courseId);
     if (!course) {
-      return res.status(404).json({
-        status: "Not Found",
-        message: "ไม่พบหลักสูตร",
-      });
+      return res.error(404, "ไม่พบหลักสูตร");
     }
 
-    // ค้นหาผู้ลงทะเบียนทั้งหมดสำหรับหลักสูตรนี้
+    // ค้นหาการลงทะเบียนทั้งหมดสำหรับหลักสูตรนี้
     const registrations = await Registration.find({ courseId })
-      .populate("userId") // ดึงข้อมูลผู้ใช้
+      .populate("userId") // ดึงข้อมูลผู้ใช้ที่ลงทะเบียน
       .sort({ date: 1, "timeSlot.start": 1 }); // เรียงตามวันที่และเวลาเริ่มต้น
 
-    if (registrations.length === 0) {
-      return res.status(404).json({
-        status: "Not Found",
-        message: "ไม่มีผู้ลงทะเบียนในหลักสูตรนี้",
-      });
+    if (!registrations || registrations.length === 0) {
+      return res.error(404, "ไม่มีผู้ลงทะเบียนในหลักสูตรนี้");
     }
 
-    // จัดกลุ่มการลงทะเบียนตามวันที่
-    const groupedByDate = registrations.reduce((acc: any, registration) => {
-      const date = registration.date.toLocaleDateString(); // แปลงวันที่เป็น string (รูปแบบที่ต้องการ)
-      if (!acc[date]) {
-        acc[date] = [];
-      }
-      acc[date].push({
-        timeSlot: registration.timeSlot,
-        user: registration.userId,
-      });
-      return acc;
-    }, {});
+    // จัดกลุ่มการลงทะเบียนตามวันที่ (ใช้ toLocaleDateString สำหรับการแปลงวันที่)
+    const groupedByDate: Record<string, any[]> = registrations.reduce(
+      (acc, registration) => {
+        const dateKey = new Date(registration.date).toLocaleDateString();
+        if (!acc[dateKey]) {
+          acc[dateKey] = [];
+        }
+        acc[dateKey].push({
+          timeSlot: registration.timeSlot,
+          user: registration.userId,
+        });
+        return acc;
+      },
+      {} as Record<string, any[]>
+    );
 
-    // ส่งผลลัพธ์ที่จัดกลุ่มตามวันที่และเวลา
-    return res.status(200).json({
-      status: "Success",
-      message: "ดึงข้อมูลการลงทะเบียนสำเร็จ",
+    return res.success("ดึงข้อมูลการลงทะเบียนสำเร็จ", {
+      count: registrations.length,
       data: groupedByDate,
     });
   } catch (error) {
     const err = error as Error;
     console.error("Error fetching course registrations:", err.message);
-    return res.status(500).json({
-      status: "Error",
-      message: "เกิดข้อผิดพลาดในการดึงข้อมูลการลงทะเบียน",
-      error: err.message,
-    });
+    return res.error(
+      500,
+      "เกิดข้อผิดพลาดในการดึงข้อมูลการลงทะเบียน",
+      err.message
+    );
   }
 };

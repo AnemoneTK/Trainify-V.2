@@ -1,12 +1,10 @@
 import CalendarComponent from "../../../components/CalendarComponent";
 import { Card } from "antd";
-import Table from "../../../components/Table";
 import CardComponent from "../../../components/CardComponent";
 import { useState, useEffect } from 'react';
 
 export default function Dashboard() {
 
-  const [isAnimationDone] = useState(false);
   
   useEffect(() => {
     const tableWrapper = document.querySelector('.table-container');
@@ -90,7 +88,7 @@ export default function Dashboard() {
           style={{ minHeight: "400px", maxWidth: "100%", overflow: "hidden" }}
         >
           <div className="overflow-x-auto">
-            <Table showActions={false} style={{ minWidth: "600px" }} /> {/* Ensures min width for readability */}
+           
           </div>
         </Card>
       </div>

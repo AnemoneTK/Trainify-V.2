@@ -23,7 +23,7 @@ export const checkUser = async (req: Request, res: Response) => {
     return res.error(400, "รูปแบบ email ไม่ถูกต้อง");
   }
 
-  const encryptedEmail = encryptData(email);
+  const encryptedEmail = encryptData(email.toLowerCase());
 
   try {
     const user = await User.findOne({ email: encryptedEmail });
@@ -53,6 +53,12 @@ export const checkUser = async (req: Request, res: Response) => {
     if (!isPasswordValid) {
       return res.error(400, "รหัสผ่านไม่ถูกต้อง");
     }
+    const userID: { id: string; role: string } = {
+      id: (user._id as ObjectId).toString(),
+      role: user.role,
+    };
+
+    (req.session as any).userID = userID;
 
     if (user.policyAccepted === null) {
       return res.error(
@@ -63,13 +69,6 @@ export const checkUser = async (req: Request, res: Response) => {
         "info"
       );
     }
-
-    const userID: { id: string; role: string } = {
-      id: (user._id as ObjectId).toString(),
-      role: user.role,
-    };
-
-    (req.session as any).userID = userID;
 
     return res.success(
       "เข้าสู่ระบบสำเร็จ กรุณาสร้าง OTP",

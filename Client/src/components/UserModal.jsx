@@ -32,7 +32,7 @@ export default function UserModal({ visible, onClose, data }) {
     titleName: "",
     firstName: "",
     lastName: "",
-    phone: "",
+    phoneNumber: "",
     startDate: dayjs(),
     departmentID: "",
     status: "active",
@@ -67,15 +67,21 @@ export default function UserModal({ visible, onClose, data }) {
     try {
       setLoading(true);
       const values = await form.validateFields();
-      const updateData = { ...values, userId: data?.userID || "" }; // 🔹 เพิ่ม userId อย่างถูกต้อง
+  
+      // แปลง startDate เป็น dayjs
+      if (values.startDate) {
+        values.startDate = dayjs(values.startDate);
+      }
+  
+      const updateData = { ...values, userId: data?.userID || "" };
       console.log("updateData", updateData);
-
+  
       const response = await callApi({
         path: isNew ? "/api/users/create" : `/api/users/edit_user`,
         method: isNew ? "post" : "patch",
-        value: updateData,
+        value: isNew ? values : updateData,
       });
-
+  
       if (response.statusCode === 200) {
         message.success(`ผู้ใช้ถูก${isNew ? "สร้าง" : "อัปเดต"}สำเร็จ`);
         onClose(true);
@@ -189,11 +195,11 @@ export default function UserModal({ visible, onClose, data }) {
           </Form.Item>
         </div>
         <Form.Item
-          name="phone"
+          name="phoneNumber"
           label="เบอร์โทรศัพท์"
           rules={[{ required: true, message: "กรุณากรอกข้อมูลให้ครบถ้วน" }]}
         >
-          <Input type="number" maxLength={10} />
+          <Input type="number" maxLength={10} disabled={!isNew}/>
         </Form.Item>
         <Form.Item name="startDate" label="วันที่เริ่มงาน">
           <DatePicker style={{ width: "100%" }} format={"DD/MM/YYYY"} />

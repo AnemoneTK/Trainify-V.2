@@ -54,6 +54,7 @@ export default function CourseModal({ visible, onClose, data }) {
 
   useEffect(() => {
     getTags();
+    console.log("data", data);
     if (data) {
       // กรณีแก้ไขหลักสูตร ให้ set ค่าเดิมกลับเข้า form พร้อมแปลงวันที่ด้วย dayjs
       form.setFieldsValue({
@@ -90,10 +91,18 @@ export default function CourseModal({ visible, onClose, data }) {
         method: "get",
         value: {},
       });
-      console.log("tag", response);
-      setTags(response.data);
+
+      // ตรวจสอบว่า response มีข้อมูลหรือไม่
+      if (response && response.data) {
+        console.log("tag", response.data);
+        setTags(response.data);
+      } else {
+        console.error("No data found in response");
+        message.error("ไม่สามารถดึงข้อมูลแท็กได้");
+      }
     } catch (error) {
-      console.log("errorResponse", error);
+      console.error("errorResponse", error);
+      message.error("เกิดข้อผิดพลาดในการดึงข้อมูลแท็ก");
     }
   };
 
@@ -117,6 +126,24 @@ export default function CourseModal({ visible, onClose, data }) {
     } catch (error) {
       console.error("Upload error:", error);
       message.error("อัปโหลดรูปภาพล้มเหลว");
+    }
+  };
+
+  const handleDeleteImage = async () => {
+    try {
+      const response = await callApi({
+        path: "/api/course/delete_banner", // ใช้ API ที่สร้างในฝั่ง Backend
+        method: "post",
+        value: { courseID: data._id },
+      });
+
+      if (response.status === "success") {
+        message.success("ลบแบนเนอร์สำเร็จ");
+        setImageUrl(""); // เคลียร์แบนเนอร์ใน UI
+      }
+    } catch (error) {
+      console.error("Error deleting banner:", error);
+      message.error("เกิดข้อผิดพลาดในการลบแบนเนอร์");
     }
   };
 
@@ -150,23 +177,23 @@ export default function CourseModal({ visible, onClose, data }) {
 
       console.log("Saving course with values:", values);
 
-      if (isNew) {
-        // การสร้างหลักสูตรใหม่
-        const response = await callApi({
-          path: "/api/course/create",
-          method: "post",
-          value: values,
-        });
-        message.success(response.message || "สร้างหลักสูตรสำเร็จ");
-      } else {
-        // การแก้ไขหลักสูตร (โดยใช้ _id ของหลักสูตรที่แก้ไข)
-        const response = await callApi({
-          path: `/api/course/update/${data._id}`,
-          method: "put",
-          value: values,
-        });
-        message.success(response.message || "แก้ไขหลักสูตรสำเร็จ");
+      // สร้าง object ที่มี courseID และ updateData (เฉพาะการแก้ไข)
+      const finalValues = isNew
+        ? values // หากเป็นการสร้างใหม่ จะส่งเฉพาะ updateData
+        : { courseID: data?._id, updateData: values }; // หากเป็นการแก้ไข จะส่ง courseID ด้วย
+
+      // เรียก API สำหรับการสร้างหรือแก้ไขหลักสูตร
+      const response = await callApi({
+        path: isNew ? "/api/course/create" : `/api/course/edit`,
+        method: isNew ? "post" : "put",
+        value: finalValues, // ส่งข้อมูลในรูปแบบ courseID และ updateData (เฉพาะการแก้ไข)
+      });
+
+      if (response && response.status == "สำเร็จ") {
+        console.log("response", response);
+        message.success(response.message || "สำเร็จ");
       }
+
       onClose(true);
     } catch (error) {
       console.error("Error saving course:", error);
@@ -189,8 +216,15 @@ export default function CourseModal({ visible, onClose, data }) {
       if (result.isConfirmed) {
         try {
           setLoading(true);
-          // สมมติว่ามีการเรียก API เพื่อลบหลักสูตร
-          message.success("ลบหลักสูตรสำเร็จ");
+          const response = await callApi({
+            path: "/api/course/delete_course",
+            method: "post",
+            value: { courseID: data._id },
+          });
+          if (response) {
+            console.log("response", response);
+            message.success("ลบหลักสูตรสำเร็จ");
+          }
           onClose(true);
         } catch (error) {
           console.error("Error deleting course:", error);
@@ -200,11 +234,6 @@ export default function CourseModal({ visible, onClose, data }) {
         }
       }
     });
-  };
-
-  // ฟังก์ชันสำหรับลบรูป banner
-  const handleDeleteImage = () => {
-    setImageUrl("");
   };
 
   return (
@@ -288,9 +317,9 @@ export default function CourseModal({ visible, onClose, data }) {
           <Form.List name="schedule">
             {(scheduleFields, { add: addSchedule, remove: removeSchedule }) => (
               <>
-                {scheduleFields.map((scheduleField, scheduleIndex) => (
+                {scheduleFields.map((scheduleField) => (
                   <div
-                    key={`schedule-${scheduleIndex}-${scheduleField.key}`}
+                    key={scheduleField.key} // ใช้ key ที่ไม่ซ้ำกัน
                     className="border p-4 mb-4 rounded-md"
                   >
                     <Space align="baseline">
@@ -298,9 +327,7 @@ export default function CourseModal({ visible, onClose, data }) {
                         {...scheduleField}
                         label="วันที่"
                         name={[scheduleField.name, "date"]}
-                        rules={[
-                          { required: true, message: "กรุณาเลือกวันที่" },
-                        ]}
+                        rules={[{ required: true, message: "กรุณากรอกวันที่" }]}
                       >
                         <DatePicker />
                       </Form.Item>
@@ -312,9 +339,9 @@ export default function CourseModal({ visible, onClose, data }) {
                     <Form.List name={[scheduleField.name, "times"]}>
                       {(timeFields, { add: addTime, remove: removeTime }) => (
                         <>
-                          {timeFields.map((timeField, timeIndex) => (
+                          {timeFields.map((timeField) => (
                             <Space
-                              key={`schedule-${scheduleIndex}-time-${timeIndex}-${timeField.key}`}
+                              key={timeField.key} // ใช้ key ที่ไม่ซ้ำกันจาก timeField
                               align="baseline"
                               style={{ display: "flex", marginBottom: 8 }}
                             >
@@ -325,7 +352,7 @@ export default function CourseModal({ visible, onClose, data }) {
                                 rules={[
                                   {
                                     required: true,
-                                    message: "กรุณาเลือกเวลาเริ่ม",
+                                    message: "กรุณากรอกเวลาเริ่ม",
                                   },
                                 ]}
                               >
@@ -338,7 +365,7 @@ export default function CourseModal({ visible, onClose, data }) {
                                 rules={[
                                   {
                                     required: true,
-                                    message: "กรุณาเลือกเวลาจบ",
+                                    message: "กรุณากรอกเวลาเริ่ม",
                                   },
                                 ]}
                               >
@@ -356,6 +383,17 @@ export default function CourseModal({ visible, onClose, data }) {
                                 ]}
                               >
                                 <InputNumber min={1} />
+                              </Form.Item>
+                              <Form.Item
+                                {...timeField}
+                                label="จำนวนที่ลงสมัคร"
+                                name={[timeField.name, "registeredSeats"]}
+                              >
+                                <InputNumber
+                                  min={0}
+                                  disabled
+                                  defaultValue={0}
+                                />
                               </Form.Item>
                               <MinusCircleOutlined
                                 onClick={() => removeTime(timeField.name)}
@@ -398,11 +436,8 @@ export default function CourseModal({ visible, onClose, data }) {
           <Form.List name="instructors">
             {(fields, { add, remove }) => (
               <>
-                {fields.map(({ key, name, fieldKey, ...restField }, index) => (
-                  <div
-                    key={`instructor-${index}-${key}`}
-                    className="flex items-center mb-2"
-                  >
+                {fields.map(({ key, name, fieldKey, ...restField }) => (
+                  <div key={key} className="flex items-center mb-2">
                     <Form.Item
                       {...restField}
                       name={[name]}

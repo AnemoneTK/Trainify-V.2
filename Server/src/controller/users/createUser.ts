@@ -23,7 +23,7 @@ export const createUser = async (req: Request, res: Response) => {
     lastName,
     phoneNumber,
     startDate,
-    department,
+    departmentID,
     status,
   } = req.body;
 
@@ -114,7 +114,7 @@ export const createUser = async (req: Request, res: Response) => {
       lastName: encryptedLastName,
       phoneNumber: encryptedPhoneNumber,
       startDate,
-      department,
+      department: departmentID,
       status: newStatus,
       createdBy: {
         userId: authHeader.id,
@@ -142,6 +142,6 @@ export const createUser = async (req: Request, res: Response) => {
     );
   } catch (error) {
     const err = error as Error;
-    return res.error(400, "สร้างบัญชีไม่สำเร็จ", err.message);
+    return res.error(500, "สร้างบัญชีไม่สำเร็จ", err.message);
   }
 };

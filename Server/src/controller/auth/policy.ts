@@ -1,44 +1,38 @@
-import {
-  Request,
-  Response,
-  jwt,
-  JwtPayload,
-  UserSchema,
-  JWT_SECRET,
-} from "../../utils/constants";
+import { Request, Response, UserSchema } from "../../utils/constants";
 
 const User = UserSchema;
 
 export const acceptPolicy = async (req: Request, res: Response) => {
   const { acceptPolicy } = req.body;
-  const userHeader = req.cookies.JWT_userID;
-  const userId = jwt.verify(userHeader, JWT_SECRET) as JwtPayload;
-  // ตรวจสอบว่าผู้ใช้ส่งค่า acceptPolicy มาหรือไม่
+
+  const sessionData = (req.session as any)?.userID;
+
+  if (!sessionData) {
+    return res.error(401, "Session หมดอายุ กรุณากรอกข้อมูลใหม่");
+  }
+
+  const userId = sessionData.id;
+
+  // ตรวจสอบว่าผู้ใช้ยอมรับนโยบายหรือไม่
   if (acceptPolicy === false) {
-    return res.status(400).json({
-      status: "user not found",
-      message: "คุณต้องยอมรับนโยบายความเป็นส่วนตัว",
-    });
+    return res.error(400, "คุณต้องยอมรับนโยบายความเป็นส่วนตัว");
   }
 
   try {
-    const user = await User.findById(userId.id);
+    // ค้นหาผู้ใช้จากฐานข้อมูล
+    const user = await User.findById(userId);
     if (!user) {
-      return res.status(400).json({
-        status: "user not found",
-        message: "คุณต้องยอมรับนโยบายความเป็นส่วนตัว",
-      });
+      return res.error(404, "ไม่พบผู้ใช้");
     }
 
     // อัปเดตสถานะการยอมรับนโยบาย
     user.policyAccepted = new Date();
     await user.save();
 
-    res.status(200).json({ message: "ยอมรับนโยบายเรียบร้อยแล้ว" });
+    // ส่งผลลัพธ์การอัปเดตสถานะการยอมรับนโยบาย
+    return res.success("ยอมรับนโยบายเรียบร้อยแล้ว");
   } catch (error) {
     const err = error as Error;
-    res
-      .status(500)
-      .json({ message: "เกิดข้อผิดพลาดในการยอมรับนโยบาย", err: err.message });
+    return res.error(500, "เกิดข้อผิดพลาดในการยอมรับนโยบาย", err.message);
   }
 };

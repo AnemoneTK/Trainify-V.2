@@ -11,6 +11,7 @@ export default function Login() {
   const location = useLocation();
   const role = location.state?.role || null;
   const [modal, setModal] = useState(false);
+  const [form] = Form.useForm();
 
   useEffect(() => {
     if (!role) {
@@ -58,24 +59,26 @@ export default function Login() {
       if (response.status === "success") {
         navigate("/otp");
       }
+      form.resetFields();
     } catch (error) {
       console.log("error", error);
-
-      Swal.fire({
-        icon: error.icon,
-        title: error.message,
-        text: error.error || "",
-        confirmButtonText: "ตกลง",
-      });
+      if (error.statusCode == 410) {
+        setModal(true);
+        form.resetFields();
+      } else {
+        Swal.fire({
+          icon: error.icon,
+          title: error.message,
+          text: error.error || "",
+          confirmButtonText: "ตกลง",
+        });
+      }
     }
   };
-  const submitModal = () => {
-    setModal(false);
-    Login();
-  };
+
   return (
     <>
-      <PolicyModal open={modal} submitModal={submitModal} />
+      <PolicyModal open={modal} />
 
       <div
         className={`flex items-center justify-center min-h-screen w-screen ${
@@ -107,6 +110,7 @@ export default function Login() {
           </div>
           {/* Ant Design Form */}
           <Form
+            form={form}
             name="login"
             layout="vertical"
             onFinish={Login}

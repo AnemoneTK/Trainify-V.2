@@ -28,7 +28,7 @@ export const getUsers = async (req: Request, res: Response) => {
         titleName: user.titleName || "",
         firstName: decryptData(user.firstName),
         lastName: decryptData(user.lastName),
-        phone: decryptData(user.phoneNumber),
+        phoneNumber: decryptData(user.phoneNumber),
         role: user.role,
         departmentID: user.department,
         department:

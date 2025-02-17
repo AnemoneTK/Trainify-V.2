@@ -34,6 +34,24 @@ export const createCourse = async (req: Request, res: Response) => {
       banner,
     } = req.body;
 
+    console.log(
+      "data :",
+      title,
+      description,
+      schedule,
+      dueDate,
+      place,
+      type,
+      instructors,
+      tag,
+      status,
+      banner
+    );
+    // ตรวจสอบว่า dueDate และ dueDate.end มีค่า
+    if (!dueDate || !dueDate.end) {
+      return res.error(400, "กรุณาระบุวันที่ปิดรับสมัคร");
+    }
+
     const now = new Date();
     const dueDateEnd = new Date(dueDate.end);
 

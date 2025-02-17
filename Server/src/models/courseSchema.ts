@@ -63,7 +63,7 @@ const CourseSchema = new Schema<CourseDocument>(
     tag: [{ type: Schema.Types.ObjectId, ref: "Tag" }],
     status: {
       type: String,
-      enum: ["save", "public", "deleted", "close"],
+      enum: ["save", "public", "deleted", "close", "end"],
       required: true,
     },
     banner: { type: String },

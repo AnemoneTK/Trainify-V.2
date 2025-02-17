@@ -32,6 +32,7 @@ const callApi = async ({
       `Error in API call to ${path}:`,
       error.response.data || error.message
     );
+    console.log("Error: ", error);
     throw error.response.data || error.message;
   }
 };

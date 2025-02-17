@@ -25,7 +25,7 @@ export default function CourseList() {
 
   useEffect(() => {
     if (users) {
-      console.log("users", users);
+      console.log("course", users);
     }
   }, [users]);
   useEffect(() => {
@@ -96,7 +96,7 @@ export default function CourseList() {
           <div>
             <Button type="primary" onClick={() => setIsModalVisible(true)}>
               <CiCirclePlus className="text-xl" />
-              เพิ่มผู้ใช้งาน
+              เพิ่มหลักสูตร
             </Button>
           </div>
         </div>
@@ -148,6 +148,22 @@ export default function CourseList() {
                     title: "ชื่อ",
                     dataIndex: "title",
                     sorter: (a, b) => a.title.localeCompare(b.title),
+                  },
+                  {
+                    title: "สถานะ",
+                    dataIndex: "status",
+                    render: (text, record) => (
+                      <div key={record._id}>
+                        {text == "public"
+                          ? "เปิดรับสมัคร"
+                          : text == "close"
+                          ? "ปิดรับสมัคร"
+                          : text == "end"
+                          ? "จบการอบรม"
+                          : ""}
+                      </div>
+                    ),
+                    sorter: (a, b) => a.status.localeCompare(b.status),
                   },
 
                   {
