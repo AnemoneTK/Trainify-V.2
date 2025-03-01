@@ -41,6 +41,8 @@ const CustomLocale = {
         "ธ.ค.",
       ],
       yearFormat: "BBBB",
+      today: "วันนี้",
+      dateFormat: "DD/MM/YYYY",
     },
   },
 };

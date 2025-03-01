@@ -196,8 +196,14 @@ export default function CourseModal({ visible, onClose, data }) {
 
       onClose(true);
     } catch (error) {
-      console.error("Error saving course:", error);
-      message.error("เกิดข้อผิดพลาดในการบันทึกหลักสูตร");
+      const errorResponse = error;
+      console.error("Error saving course:", errorResponse);
+
+      if (errorResponse.statusCode !== 500) {
+        message.error(`${errorResponse.message}`);
+      } else {
+        message.error("เกิดข้อผิดพลาดในการบันทึกหลักสูตร");
+      }
     } finally {
       setLoading(false);
     }
@@ -217,7 +223,7 @@ export default function CourseModal({ visible, onClose, data }) {
         try {
           setLoading(true);
           const response = await callApi({
-            path: "/api/course/delete_course",
+            path: "/api/course/delete",
             method: "post",
             value: { courseID: data._id },
           });
@@ -470,14 +476,12 @@ export default function CourseModal({ visible, onClose, data }) {
           </Form.List>
         </Form.Item>
 
-        {/* Tag: ใช้ Select แบบ multiple */}
         <Form.Item name="tag" label="แท็ก">
           <Select
             placeholder="เลือกแท็กสำหรับหลักสูตร"
             mode="multiple"
             optionFilterProp="children"
           >
-            <Option value="">ไม่ระบุ</Option>
             {tags?.length > 0 &&
               tags.map((tag) => (
                 <Option key={tag._id} value={tag._id}>

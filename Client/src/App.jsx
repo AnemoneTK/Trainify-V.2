@@ -8,9 +8,8 @@ import SelectRole from "./pages/SelectRole";
 import Login from "./pages/Login";
 import EmpLayout from "./layout/emp/EmpLayout";
 import EmpDashboard from "./pages/emp/dashboard/Dashboard";
-import Empschedule from "./pages/emp/schedule/Schedule";
-import Enmpmycourse from "./pages/emp/mycourse/Mycourse";
-import Course from "./pages/emp/courseadd/Course";
+import AllCourse from "./pages/emp/AllCourse";
+import RegisteredCourse from "./pages/emp/RegisteredCourse";
 import AdminLayout from "./layout/admin/AdminLayout";
 import SaAdminLayout from "./layout/superadmin/SaAdminLayout";
 
@@ -47,26 +46,18 @@ function App() {
               }
             />
             <Route
-              path="/schedule"
-              element={
-                <EmpLayout>
-                  <Empschedule />
-                </EmpLayout>
-              }
-            />
-            <Route
-              path="/my_course"
-              element={
-                <EmpLayout>
-                  <Enmpmycourse />
-                </EmpLayout>
-              }
-            />
-            <Route
               path="/courses"
               element={
                 <EmpLayout>
-                  <Course />
+                  <AllCourse />
+                </EmpLayout>
+              }
+            />
+            <Route
+              path="/register_courses"
+              element={
+                <EmpLayout>
+                  <RegisteredCourse />
                 </EmpLayout>
               }
             />

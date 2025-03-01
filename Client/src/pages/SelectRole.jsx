@@ -26,11 +26,11 @@ export default function SelectRole() {
   ];
 
   return (
-    <div className="flex items-center justify-center min-h-screen w-screen bg-background overflow-hidden px-4">
+    <div className="flex items-center justify-center min-h-screen w-screen bg-background overflow-hidden px-4 bg-bg">
       <div className="bg-white flex flex-col items-center justify-center rounded-lg h-auto w-full  max-w-5xl shadow-lg px-6 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-semibold text-center text-primary">
+          <h1 className="text-3xl sm:text-4xl font-semibold text-center text-black">
             เลือกบทบาทของคุณ
           </h1>
         </div>

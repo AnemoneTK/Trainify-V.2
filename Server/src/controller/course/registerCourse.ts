@@ -1,110 +1,50 @@
 import {
   Request,
   Response,
-  bcrypt,
-  jwt,
-  JwtPayload,
   UserSchema,
   CourseSchema,
-  UserLogSchema,
-  LoginLogSchema,
-  encryptData,
   decryptData,
-  otpGenerator,
-  nodemailer,
-  JWT_SECRET,
 } from "../../utils/constants";
-
-import RegistrationSchema from "../../models/registrationSchema";
-const Registration = RegistrationSchema;
+import nodemailer from "nodemailer";
+import registrationSchema from "../../models/registrationSchema";
+const Registration = registrationSchema;
 const Course = CourseSchema;
 const User = UserSchema;
+import dayjs from "dayjs";
 
 export const registerCourse = async (req: Request, res: Response) => {
   const { courseId, date, timeSlot } = req.body;
-  const authHeader = req.cookies?.token;
+  const sessionData = (req.session as any)?.userData;
 
-  if (!authHeader) {
-    return res.status(401).json({
-      status: "Unauthorized",
-      message: "ไม่พบ token",
-    });
+  if (!sessionData) {
+    return res.error(401, "ไม่พบข้อมูลผู้ใช้ใน session");
   }
 
-  try {
-    const decodedToken = jwt.verify(authHeader, JWT_SECRET) as JwtPayload;
-    const userId = decodedToken.id;
+  const userId = sessionData.id;
 
+  try {
     // ค้นหาคอร์ส
     const course = await Course.findById(courseId);
     if (!course) {
-      return res.status(404).json({
-        status: "Error",
-        message: "ไม่พบหลักสูตร",
-      });
+      return res.error(404, "ไม่พบหลักสูตร");
     }
 
     if (course.status === "deleted") {
-      return res.status(400).json({
-        status: "Error",
-        message: "คอร์สนี้ถูกลบแล้ว ไม่สามารถลงทะเบียนได้",
-      });
+      return res.error(400, "คอร์สนี้ถูกลบแล้ว ไม่สามารถลงทะเบียนได้");
     }
 
     if (course.status === "close") {
-      return res.status(400).json({
-        status: "Error",
-        message: "คอร์สนี้ปิดรับสมัครแล้ว ไม่สามารถลงทะเบียนได้",
-      });
+      return res.error(400, "คอร์สนี้ปิดรับสมัครแล้ว ไม่สามารถลงทะเบียนได้");
     }
+
     const requestedDate = new Date(date);
     const currentDate = new Date();
 
     if (requestedDate < currentDate) {
-      return res.status(400).json({
-        status: "Error",
-        message:
-          "วันที่ไม่สามารถลงทะเบียนได้ วันที่ต้องเป็นวันปัจจุบันหรือวันในอนาคตเท่านั้น",
-      });
-    }
-
-    const requestedStartTime = new Date(timeSlot.start);
-    const requestedEndTime = new Date(timeSlot.end);
-
-    // ค้นหาช่วงเวลาที่ตรงกับคอร์ส
-    const timeSlotFound = course.schedule
-      .find((slot) => {
-        const courseDate = new Date(slot.date).toISOString().split("T")[0];
-        const requestDate = new Date(date).toISOString().split("T")[0];
-        return courseDate === requestDate; // ตรวจสอบว่าเป็นวันเดียวกันหรือไม่
-      })
-      ?.times.find((time) => {
-        const courseStartTime = new Date(time.start);
-        const courseEndTime = new Date(time.end);
-        return (
-          requestedStartTime.getTime() === courseStartTime.getTime() &&
-          requestedEndTime.getTime() === courseEndTime.getTime()
-        );
-      });
-
-    if (!timeSlotFound) {
-      return res.status(400).json({
-        status: "Error",
-        message: "ไม่พบช่วงเวลานี้ในหลักสูตร",
-      });
-    }
-    const conflictingRegistration = await Registration.findOne({
-      userId,
-      date,
-      "timeSlot.start": { $lt: requestedEndTime },
-      "timeSlot.end": { $gt: requestedStartTime },
-    });
-
-    if (conflictingRegistration) {
-      return res.status(400).json({
-        status: "Error",
-        message: "เวลานี้ซ้อนทับกับการลงทะเบียนคอร์สอื่น",
-      });
+      return res.error(
+        400,
+        "วันที่ไม่สามารถลงทะเบียนได้ วันที่ต้องเป็นวันปัจจุบันหรือวันในอนาคตเท่านั้น"
+      );
     }
 
     // ตรวจสอบการลงทะเบียนเดิมของผู้ใช้
@@ -115,22 +55,41 @@ export const registerCourse = async (req: Request, res: Response) => {
     });
 
     if (existingRegistration) {
-      return res.status(400).json({
-        status: "Error",
-        message: "คุณได้ลงทะเบียนคอร์สนี้แล้ว",
-      });
+      return res.error(400, "คุณได้ลงทะเบียนคอร์สนี้แล้ว");
     }
-    const passedRegistration = await Registration.findOne({
-      courseId,
+
+    const requestedStartTime = dayjs(timeSlot.start).startOf("minute");
+    const requestedEndTime = dayjs(timeSlot.end).startOf("minute");
+
+    // ค้นหาช่วงเวลาที่ตรงกับคอร์ส
+    const timeSlotFound = course.schedule
+      .find((slot) => {
+        const courseDate = dayjs(slot.date).format("YYYY-MM-DD"); // ใช้ dayjs เพื่อจัดการเวลา
+        const requestDate = dayjs(date).format("YYYY-MM-DD");
+        return courseDate === requestDate; // ตรวจสอบว่าเป็นวันเดียวกันหรือไม่
+      })
+      ?.times.find((time) => {
+        const courseStartTime = dayjs(time.start).startOf("minute");
+        const courseEndTime = dayjs(time.end).startOf("minute");
+        return (
+          requestedStartTime.isSame(courseStartTime) &&
+          requestedEndTime.isSame(courseEndTime)
+        );
+      });
+
+    if (!timeSlotFound) {
+      return res.error(400, "ไม่พบช่วงเวลานี้ในหลักสูตร");
+    }
+
+    const conflictingRegistration = await Registration.findOne({
       userId,
       date,
-      "timeSlot.start": timeSlot.start,
-      "timeSlot.end": timeSlot.end,
-      status: "passed",
+      "timeSlot.start": { $lt: requestedEndTime },
+      "timeSlot.end": { $gt: requestedStartTime },
     });
-    if (passedRegistration) {
-      passedRegistration.status = "extend";
-      await passedRegistration.save();
+
+    if (conflictingRegistration) {
+      return res.error(400, "เวลานี้ซ้อนทับกับการลงทะเบียนคอร์สอื่น");
     }
 
     // ตรวจสอบจำนวนที่นั่งในช่วงเวลานี้
@@ -142,10 +101,7 @@ export const registerCourse = async (req: Request, res: Response) => {
     });
 
     if (currentRegistrations >= timeSlotFound.seat) {
-      return res.status(400).json({
-        status: "Error",
-        message: "ที่นั่งในช่วงเวลานี้เต็มแล้ว",
-      });
+      return res.error(400, "ที่นั่งในช่วงเวลานี้เต็มแล้ว");
     }
 
     // สร้างการลงทะเบียนใหม่
@@ -158,6 +114,27 @@ export const registerCourse = async (req: Request, res: Response) => {
     });
 
     await newRegistration.save();
+
+    // อัพเดตจำนวน registeredSeats ใน timeSlot
+    const updatedTimeSlot = course.schedule
+      .find((slot) => {
+        const courseDate = dayjs(slot.date).format("YYYY-MM-DD");
+        const requestDate = dayjs(date).format("YYYY-MM-DD");
+        return courseDate === requestDate;
+      })
+      ?.times.find((time) => {
+        const courseStartTime = dayjs(time.start).startOf("minute");
+        const courseEndTime = dayjs(time.end).startOf("minute");
+        return (
+          requestedStartTime.isSame(courseStartTime) &&
+          requestedEndTime.isSame(courseEndTime)
+        );
+      });
+
+    if (updatedTimeSlot) {
+      updatedTimeSlot.registeredSeats += 1; // เพิ่มจำนวนที่นั่งที่ลงทะเบียน
+      await course.save(); // บันทึกการอัพเดตในฐานข้อมูล
+    }
 
     // ส่งอีเมลแจ้งเตือนการลงทะเบียน
     const user = await User.findById(userId);
@@ -173,19 +150,16 @@ export const registerCourse = async (req: Request, res: Response) => {
       );
     }
 
-    return res.status(200).json({
-      status: "Success",
-      message: "ลงทะเบียนคอร์สสำเร็จ",
+    return res.success("ลงทะเบียนคอร์สสำเร็จ", {
       registration: newRegistration,
     });
   } catch (error) {
-    const err = error as Error;
     console.error("Error during registration process:", error);
-    return res.status(500).json({
-      status: "Error",
-      message: "เกิดข้อผิดพลาดในการลงทะเบียนคอร์ส",
-      error: err.message,
-    });
+    return res.error(
+      500,
+      "เกิดข้อผิดพลาดในการลงทะเบียนคอร์ส",
+      (error as Error).message
+    );
   }
 };
 
@@ -198,7 +172,6 @@ const sendRegistrationEmail = async (
   place: string,
   userName: string
 ) => {
-  console.log("Sending email to:", email);
   const Trainify_Email = process.env.Trainify_Email;
   const Trainify_Password = process.env.Trainify_Email_Password;
 
@@ -231,7 +204,6 @@ const sendRegistrationEmail = async (
   };
 
   try {
-    console.log("Sending email...");
     await transporter.sendMail(mailOptions);
     console.log("อีเมลแจ้งเตือนการลงทะเบียนถูกส่งไปยัง:", email);
   } catch (error) {

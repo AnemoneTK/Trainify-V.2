@@ -10,9 +10,7 @@ export default function Profile() {
   const { userData } = useUser();
   const URL = import.meta.env.VITE_BASE_URL;
   useEffect(() => {
-    if (userData) {
-      console.log("userData", userData);
-    }
+    console.log("userData", userData);
   }, [userData]);
   const dropdownItems = [
     {
@@ -79,7 +77,7 @@ export default function Profile() {
           <Space className="text-white">
             <RiAccountCircleFill className="text-4xl " />
             <div className=" hidden md:flex md:flex-row  gap-2">
-              <div>{userData?.name}</div>
+              <div>{userData?.fullName}</div>
               <DownOutlined />
             </div>
           </Space>

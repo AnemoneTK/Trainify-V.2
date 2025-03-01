@@ -67,21 +67,21 @@ export default function UserModal({ visible, onClose, data }) {
     try {
       setLoading(true);
       const values = await form.validateFields();
-  
+
       // แปลง startDate เป็น dayjs
       if (values.startDate) {
         values.startDate = dayjs(values.startDate);
       }
-  
+
       const updateData = { ...values, userId: data?.userID || "" };
       console.log("updateData", updateData);
-  
+
       const response = await callApi({
         path: isNew ? "/api/users/create" : `/api/users/edit_user`,
         method: isNew ? "post" : "patch",
         value: isNew ? values : updateData,
       });
-  
+
       if (response.statusCode === 200) {
         message.success(`ผู้ใช้ถูก${isNew ? "สร้าง" : "อัปเดต"}สำเร็จ`);
         onClose(true);
@@ -199,7 +199,7 @@ export default function UserModal({ visible, onClose, data }) {
           label="เบอร์โทรศัพท์"
           rules={[{ required: true, message: "กรุณากรอกข้อมูลให้ครบถ้วน" }]}
         >
-          <Input type="number" maxLength={10} disabled={!isNew}/>
+          <Input type="number" maxLength={10} disabled={!isNew} />
         </Form.Item>
         <Form.Item name="startDate" label="วันที่เริ่มงาน">
           <DatePicker style={{ width: "100%" }} format={"DD/MM/YYYY"} />
@@ -236,7 +236,11 @@ export default function UserModal({ visible, onClose, data }) {
             </Radio.Group>
           </Form.Item>
         </div>
-
+        {/* <Form.Item label="รีเซทรหัสผ่าน">
+          <Button onClick={handleSave} className="ml-auto ">
+            รีเซทรหัสผ่านผู้ใช้
+          </Button>
+        </Form.Item> */}
         <div className="flex justify-between  ">
           {!isNew && (
             <Button danger onClick={handleDelete}>

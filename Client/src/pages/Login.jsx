@@ -100,7 +100,7 @@ export default function Login() {
           {/* Logo */}
           <div className="flex flex-col items-center">
             <img src={logo} alt="Logo" className="w-28 h-28 mb-4" />
-            <h1 className="text-3xl font-bold text-center">
+            <h1 className="text-3xl font-bold text-center text-black">
               เข้าสู่ระบบ
               <span className={`${theme.text || "text-black"}`}>
                 {" "}

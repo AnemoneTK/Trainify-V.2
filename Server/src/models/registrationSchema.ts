@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
-
+import { CourseDocument } from "./courseSchema";
 interface RegistrationDocument extends Document {
-  courseId: mongoose.Types.ObjectId;
+  courseId: mongoose.Types.ObjectId | CourseDocument;
   userId: mongoose.Types.ObjectId;
   date: Date;
   timeSlot: { start: Date; end: Date };

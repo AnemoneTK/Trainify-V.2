@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Types } from "mongoose";
 
-interface CourseDocument extends Document {
+export interface CourseDocument extends Document {
   title: string;
   description: string;
   schedule: {
@@ -24,8 +24,10 @@ interface CourseDocument extends Document {
     fullName: string;
     role: string;
   };
+  availabilityStatus: boolean;
   createdAt: Date;
   updatedAt: Date;
+  registrationStatus: Boolean;
 }
 
 const CourseSchema = new Schema<CourseDocument>(
@@ -72,6 +74,8 @@ const CourseSchema = new Schema<CourseDocument>(
       fullName: { type: String, required: true },
       role: { type: String, required: true },
     },
+    availabilityStatus: { type: Boolean },
+    registrationStatus: { type: Boolean },
   },
   { timestamps: true } // Mongoose จะจัดการ createdAt และ updatedAt อัตโนมัติ
 );

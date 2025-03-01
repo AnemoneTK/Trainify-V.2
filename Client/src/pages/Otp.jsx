@@ -159,7 +159,7 @@ export default function Otp() {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen w-screen bg-background overflow-hidden">
+    <div className="flex items-center justify-center h-screen w-screen bg-background overflow-hidden bg-bg text-black">
       <div className="bg-white relative flex-col items-center justify-center rounded-none lg:rounded-lg h-screen w-screen  md:h-1/2 md:w-1/2 xl:w-1/3 shadow-xl shadow-cyan-500/50 px-2 pt-3">
         <div className="text-4xl text-center font-extrabold text-employee">
           ยืนยันรหัส OTP
@@ -201,7 +201,7 @@ export default function Otp() {
                 <div>
                   ไม่ได้รับรหัส OTP?{" "}
                   <span
-                    className="text-employee underline cursor-pointer"
+                    className="text-emp-primary underline cursor-pointer"
                     onClick={() => resetOtp()}
                   >
                     ขอ OTP ใหม่

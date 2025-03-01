@@ -1,10 +1,4 @@
-import {
-  Request,
-  Response,
-  UserSchema,
-  CourseSchema,
-} from "../../utils/constants";
-
+import { Request, Response, CourseSchema } from "../../utils/constants";
 const Course = CourseSchema;
 
 export const createCourse = async (req: Request, res: Response) => {
@@ -34,19 +28,6 @@ export const createCourse = async (req: Request, res: Response) => {
       banner,
     } = req.body;
 
-    console.log(
-      "data :",
-      title,
-      description,
-      schedule,
-      dueDate,
-      place,
-      type,
-      instructors,
-      tag,
-      status,
-      banner
-    );
     // ตรวจสอบว่า dueDate และ dueDate.end มีค่า
     if (!dueDate || !dueDate.end) {
       return res.error(400, "กรุณาระบุวันที่ปิดรับสมัคร");
@@ -72,6 +53,34 @@ export const createCourse = async (req: Request, res: Response) => {
             dueDateEnd.toISOString().split("T")[0]
           })`
         );
+      }
+
+      // ตรวจสอบเวลาซ้ำกันในวันเดียวกัน
+      const timeSlots = item.times;
+
+      // เปรียบเทียบเวลาที่กรอกมาใน times
+      for (let i = 0; i < timeSlots.length; i++) {
+        const existingTime = timeSlots[i];
+
+        for (let j = i + 1; j < timeSlots.length; j++) {
+          const compareTime = timeSlots[j];
+
+          // แปลงเป็นเวลาในรูปแบบที่สามารถเปรียบเทียบได้
+          const existingStart = new Date(existingTime.start).getTime();
+          const existingEnd = new Date(existingTime.end).getTime();
+          const compareStart = new Date(compareTime.start).getTime();
+          const compareEnd = new Date(compareTime.end).getTime();
+
+          // ตรวจสอบการทับซ้อนของเวลา
+          if (existingStart < compareEnd && existingEnd > compareStart) {
+            return res.error(
+              400,
+              `เวลาการเรียนซ้ำกันในวันที่ ${new Date(
+                item.date
+              ).toLocaleDateString()}`
+            );
+          }
+        }
       }
     }
 

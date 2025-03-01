@@ -14,6 +14,8 @@ import {
   updateTag,
   deleteTag,
 } from "../controller/course/tagController";
+import { getUserRegistrations } from "../controller/course/userCourse";
+
 const router = express.Router();
 
 router.post("/create", createCourse);
@@ -24,8 +26,10 @@ router.put("/edit", editCourse);
 router.post("/delete", deleteCourse);
 router.post("/register", registerCourse);
 router.post("/course_register_details", getCourseRegistrations);
+router.post("/user_register_details", getUserRegistrations);
 router.post("/confirm_result", confirmTrainingResults);
 router.get("/available_courses", getAvailableCourses);
+
 router.post("/tag/create", createTag);
 router.get("/tag/gets", getTags);
 router.post("/tag/update", updateTag);

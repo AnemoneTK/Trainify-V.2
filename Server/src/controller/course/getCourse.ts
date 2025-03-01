@@ -1,5 +1,15 @@
 import { Request, Response, CourseSchema } from "../../utils/constants";
+import registrationSchema from "../../models/registrationSchema";
 const Course = CourseSchema;
+const Registration = registrationSchema;
+
+interface TimeSlot {
+  start: Date;
+  end: Date;
+  seat: number;
+  registeredSeats: number;
+  availableSeats?: number; // เพิ่ม `availableSeats` ในชนิดข้อมูล
+}
 
 export const getCourse = async (req: Request, res: Response) => {
   try {
@@ -30,7 +40,7 @@ export const getCourse = async (req: Request, res: Response) => {
       if (sessionData.role === "admin") {
         filter.status = status;
       } else {
-        filter.status = "public"; // พนักงานเห็นเฉพาะ public
+        filter.status = "public";
       }
     }
 
@@ -50,7 +60,50 @@ export const getCourse = async (req: Request, res: Response) => {
 
     filter.status = { $ne: "deleted" };
 
-    const courses = await Course.find(filter);
+    const courses = await Course.find(filter).populate("tag");
+
+    // ตรวจสอบจำนวนที่นั่งว่างในแต่ละคอร์ส
+    for (const course of courses) {
+      let allFull = true;
+      for (const schedule of course.schedule) {
+        schedule.times = await Promise.all(
+          schedule.times.map(async (timeSlot: TimeSlot) => {
+            const totalSeats = timeSlot.seat;
+            const registeredSeats = await Registration.countDocuments({
+              courseId: course._id,
+              date: schedule.date,
+              "timeSlot.start": timeSlot.start,
+              "timeSlot.end": timeSlot.end,
+              status: "registered",
+            });
+
+            const availableSeats = totalSeats - registeredSeats;
+            const updatedTimeSlot = { ...timeSlot, availableSeats };
+            if (availableSeats > 0) {
+              allFull = false;
+            }
+            return updatedTimeSlot;
+          })
+        );
+      }
+      // เพิ่มสถานะ availabilityStatus ให้กับคอร์ส
+      course.availabilityStatus = allFull ? false : true;
+    }
+
+    // ถ้าเป็น employee ให้ตรวจสอบสถานะการลงทะเบียน
+    if (sessionData.role === "employee") {
+      // ดึงการลงทะเบียนของผู้ใช้สำหรับคอร์สนี้
+      for (const course of courses) {
+        const registration = await Registration.findOne({
+          userId: sessionData.id,
+          courseId: course._id,
+          status: "registered",
+        });
+
+        // ถ้ามีการลงทะเบียนให้เพิ่มสถานะการลงทะเบียน
+        course.registrationStatus = registration ? true : false;
+      }
+    }
 
     return res.success("ดึงข้อมูลคอร์สสำเร็จ", {
       count: courses.length,
