@@ -78,21 +78,19 @@ export default function EmpList() {
       setSpinning(false);
     } catch (error) {
       console.log("errorResponse", error);
-      if (error.statusCode === 400) {
+      if (error.statusCode === 400 || error.statusCode === 401) {
         Swal.fire({
           title: `${error.message}`,
           message: `${error.error}`,
           icon: `${error.icon}`,
           confirmButtonText: "ตกลง",
+        }).then(() => {
+          if (error.statusCode === 401) {
+            navigate("/");
+          }
         });
       } else {
-        Swal.fire({
-          title: `${error.message}`,
-          icon: `${error.icon}`,
-          confirmButtonText: "ตกลง",
-        }).then(() => {
-          navigate("/");
-        });
+        navigate("/");
       }
     }
   };

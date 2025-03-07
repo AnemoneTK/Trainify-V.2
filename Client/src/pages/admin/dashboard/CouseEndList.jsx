@@ -1,6 +1,5 @@
 import { CiSearch } from "react-icons/ci";
 import { Input, Button, Table, Spin, Tag, Space, Badge } from "antd";
-import { TbFileExport } from "react-icons/tb";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
@@ -68,13 +67,20 @@ export default function CourseEndList({ setEndCourse }) {
       setSpinning(false);
     } catch (error) {
       console.log("errorResponse", error);
-      Swal.fire({
-        title: `${error.message}`,
-        icon: "error",
-        confirmButtonText: "ตกลง",
-      }).then(() => {
+      if (error.statusCode === 400 || error.statusCode === 401) {
+        Swal.fire({
+          title: `${error.message}`,
+          message: `${error.error}`,
+          icon: `${error.icon}`,
+          confirmButtonText: "ตกลง",
+        }).then(() => {
+          if (error.statusCode === 401) {
+            navigate("/");
+          }
+        });
+      } else {
         navigate("/");
-      });
+      }
       setSpinning(false);
     }
   };

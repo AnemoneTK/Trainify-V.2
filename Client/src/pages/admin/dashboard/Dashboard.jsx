@@ -34,7 +34,9 @@ export default function Dashboard() {
           icon: `${error.icon}`,
           confirmButtonText: "ตกลง",
         }).then(() => {
-          navigate("/");
+          if (error.statusCode === 401) {
+            navigate("/");
+          }
         });
       } else {
         navigate("/");
