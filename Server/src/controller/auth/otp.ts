@@ -15,39 +15,31 @@ const User = UserSchema;
 
 export const createOtp = async (req: Request, res: Response) => {
   try {
-    // Verify JWT and extract user ID
-    const userId = jwt.verify(req.cookies.JWT_userID, JWT_SECRET) as JwtPayload;
-    // Find the user by ID
-    const user = await UserSchema.findById(userId.id);
-    if (!user || !userId) {
-      return res.status(403).json({
-        status: "error",
-        message: "ไม่พบผู้ใช้",
-      });
-    }
+    const userId = (req.session as any).userID;
+
+    if (!userId) return res.error(403, "ไม่พบรหัสผู้ใช้", "กรุณาเข้าสู่ระบบ");
+
+    const user = await User.findById(userId.id);
+    if (!user) return res.error(404, "ไม่พบผู้ใช้");
 
     const currentTime = Date.now();
     const otpCooldown = 120000; // 2 นาที
 
-    // Check if the user is still in the cooldown period
-    if (user.lastOtpSentTime) {
-      if (currentTime - user.lastOtpSentTime.getTime() < otpCooldown) {
-        return res.status(200).json({
-          status: "Waiting for otp",
-          message: `กรุณารออีก ${
-            (otpCooldown - (currentTime - user.lastOtpSentTime.getTime())) /
-            1000
-          } วินาที`,
-          time: `${
-            (otpCooldown - (currentTime - user.lastOtpSentTime.getTime())) /
-            1000
-          }`,
-          ref: user.otpREF,
-        });
-      }
+    if (
+      user.lastOtpSentTime &&
+      currentTime - user.lastOtpSentTime.getTime() < otpCooldown
+    ) {
+      const remainingTime = Math.ceil(
+        (otpCooldown - (currentTime - user.lastOtpSentTime.getTime())) / 1000
+      );
+      return res.success(
+        `กรุณารออีก ${remainingTime} วินาที`,
+        { ref: user.otpREF, waitingTime: remainingTime },
+        null,
+        "info"
+      );
     }
 
-    // Generate OTP and OTP reference
     const otp = otpGenerator.generate(6, {
       upperCaseAlphabets: false,
       lowerCaseAlphabets: false,
@@ -61,84 +53,103 @@ export const createOtp = async (req: Request, res: Response) => {
       digits: true,
     });
 
-    // Send OTP email
     await sendOtpEmail(decryptData(user.email), otp, otpREF);
 
-    // Update user with new OTP details
     user.otp = otp;
     user.otpREF = otpREF;
-    user.otpExpires = Date.now() + 120000; // หมดอายุใน 2 นาที
-    user.lastOtpSentTime = new Date(); // อัปเดตเวลาส่ง OTP ล่าสุด
+    user.otpExpires = currentTime + otpCooldown;
+    user.lastOtpSentTime = new Date();
     await user.save();
 
-    // Respond with success message
-    return res.status(200).json({
-      status: "otp sent",
-      message: "กรุณาตรวจสอบรหัส OTP ในอีเมล",
-      time: `${
-        (otpCooldown - (currentTime - user.lastOtpSentTime.getTime())) / 1000
-      }`,
-      ref: otpREF,
-      userID: user._id,
-      nextStep: "/auth/verify_otp",
-    });
+    return res.success(
+      "OTP ถูกส่งไปยังอีเมล",
+      { ref: otpREF, waitingTime: otpCooldown / 1000 },
+      "/auth/verify_otp"
+    );
   } catch (error) {
-    const err = error as Error;
-    return res.status(500).json({
-      status: "error",
-      message: "เกิดข้อผิดพลาดในการสร้าง OTP",
-      error: err.message,
-    });
+    return res.error(
+      500,
+      "เกิดข้อผิดพลาดในการสร้าง OTP",
+      (error as Error).message
+    );
   }
 };
 
-//Send OTP
-const sendOtpEmail = async (email: string, otp: string, otpREF: string) => {
-  const Trainify_Email = process.env.Trainify_Email;
-  const Trainify_Password = process.env.Trainify_Email_Password;
-
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false,
-    auth: {
-      user: Trainify_Email,
-      pass: Trainify_Password,
-    },
-  });
-
-  const mailOptions = {
-    from: "Trainify Project <no-reply@trainify.com>",
-    to: email,
-    subject: `Trainify <${otpREF}>`,
-    html: `
-      <p>รหัสอ้างอิง: ${otpREF}</p>
-      <p>รหัสยืนยันตัวตนของคุณคือ: <strong>${otp}</strong></p>
-      <p>กรุณาใช้รหัสนี้เพื่อยืนยันตัวตนของคุณภายใน 5 นาที หากคุณไม่ได้ทำการเข้าสู่ระบบ กรุณาละเลยอีเมลนี้</p>
-      <p>หากคุณมีคำถามเพิ่มเติม สามารถติดต่อเราที่ <a href="mailto:support@trainify.com">support@trainify.com</a></p>
-      <p>ขอบคุณ,<br>ทีมงาน Trainify</p>
-    `,
-  };
-  // ส่งอีเมล
-  await transporter.sendMail(mailOptions);
-  console.log("อีเมลถูกส่งไปยัง:", email);
-};
-
-// verify otp
-export const verifyOtp = async (req: Request, res: Response) => {
-  const { otp } = req.body;
-  const userId = jwt.verify(req.cookies.JWT_userID, JWT_SECRET) as JwtPayload;
-
+export const resetOtp = async (req: Request, res: Response) => {
   try {
-    //หาผู้ใช้เพื่อนำ OTP ในฐานข้อมูลมาเปรียบเทียบ
+    const userId = (req.session as any).userID;
+
+    if (!userId) return res.error(403, "ไม่พบรหัสผู้ใช้", "กรุณาเข้าสู่ระบบ");
+
     const user = await User.findById(userId.id);
-    if (!user) {
-      return res.status(404).json({ status: "error", message: "ไม่พบผู้ใช้" });
+    if (!user) return res.error(404, "ไม่พบผู้ใช้");
+
+    const currentTime = Date.now();
+    const otpCooldown = 120000; // 2 นาที
+
+    if (
+      user.lastOtpSentTime &&
+      currentTime - user.lastOtpSentTime.getTime() < otpCooldown
+    ) {
+      const remainingTime = Math.ceil(
+        (otpCooldown - (currentTime - user.lastOtpSentTime.getTime())) / 1000
+      );
+      return res.success(
+        `กรุณารออีก ${remainingTime} วินาที`,
+        { ref: user.otpREF, waitingTime: remainingTime },
+        null,
+        "info"
+      );
     }
 
-    // ตรวจสอบ OTP และเวลาหมดอายุ
+    const newOtp = otpGenerator.generate(6, {
+      upperCaseAlphabets: false,
+      lowerCaseAlphabets: false,
+      specialChars: false,
+      digits: true,
+    });
+    const newOtpREF = otpGenerator.generate(6, {
+      upperCaseAlphabets: false,
+      lowerCaseAlphabets: true,
+      specialChars: false,
+      digits: true,
+    });
+
+    await sendOtpEmail(decryptData(user.email), newOtp, newOtpREF);
+
+    user.otp = newOtp;
+    user.otpREF = newOtpREF;
+    user.otpExpires = currentTime + otpCooldown;
+    user.lastOtpSentTime = new Date();
+    await user.save();
+
+    return res.success(
+      "OTP ใหม่ถูกส่งไปยังอีเมลของคุณ",
+      { ref: newOtpREF, waitingTime: otpCooldown / 1000 },
+      "/auth/verify_otp"
+    );
+  } catch (error) {
+    return res.error(
+      500,
+      "เกิดข้อผิดพลาดในการรีเซ็ต OTP",
+      (error as Error).message
+    );
+  }
+};
+
+export const verifyOtp = async (req: Request, res: Response) => {
+  const { otp } = req.body;
+
+  try {
+    const userId = (req.session as any).userID;
+
+    if (!userId) return res.error(403, "ไม่พบ token ยืนยันตัวตน");
+
+    const user = await User.findById(userId.id);
+    if (!user) return res.error(404, "ไม่พบผู้ใช้");
+
     const currentTime = Date.now();
+
     if (user.otp !== otp) {
       await LoginLogSchema.create({
         userId: user._id,
@@ -146,116 +157,72 @@ export const verifyOtp = async (req: Request, res: Response) => {
         success: false,
         ip: req.ip,
       });
-      return res
-        .status(400)
-        .json({ status: "warning", message: "OTP ไม่ถูกต้อง" });
+      return res.error(400, "OTP ไม่ถูกต้อง", null, null, "warning");
     }
-    if (user.otpExpires === undefined || currentTime > user.otpExpires) {
+
+    if (!user.otpExpires || currentTime > user.otpExpires) {
       await LoginLogSchema.create({
         userId: user._id,
         email: decryptData(user.email),
         success: false,
         ip: req.ip,
       });
-      return res
-        .status(400)
-        .json({ status: "warning", message: "OTP หมดอายุ" });
+      return res.error(400, "OTP หมดอายุ", null, null, "warning");
     }
 
-    // ถ้าทุกอย่างถูกต้องทำการสร้าง JWT
-    const token = jwt.sign(
-      {
-        id: user._id,
-        email: decryptData(user.email),
-        role: user.role,
-        name: decryptData(user.firstName),
-        fullName: `${decryptData(user.firstName)} ${decryptData(
-          user.lastName
-        )}`,
-        department: user.department,
-      },
-      JWT_SECRET,
-      { expiresIn: "2h" } // ตั้งเวลาหมดอายุของ token
-    );
+    const userData = {
+      id: user._id,
+      email: decryptData(user.email),
+      role: user.role,
+      name: decryptData(user.firstName),
+      fullName: `${decryptData(user.firstName)} ${decryptData(user.lastName)}`,
+      department: user.department,
+    };
 
-    // ลบ OTP และเวลาหมดอายุออกจากผู้ใช้
     user.otp = undefined;
     user.otpREF = undefined;
     user.otpExpires = undefined;
     user.lastOtpSentTime = null;
     await user.save();
 
-    await LoginLogSchema.create({
-      userId: user._id,
-      email: user.email,
-      success: true,
-      ip: req.ip,
-    });
-
-    //เก็บ token เป็น cookie
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: true,
-      maxAge: 2 * 60 * 60 * 1000, // ระยะเวลาหมดอายุของ cookie (2 ชั่วโมง)
-    });
-    res.clearCookie("JWT_userID");
-    return res.status(200).json({
-      status: "Login Success",
-      message: "OTP ถูกต้อง",
-      role: user.role,
-    });
+    (req.session as any).userData = userData;
+    return res.success(
+      "OTP ถูกต้อง",
+      { role: user.role, waitingTime: 0 },
+      "/dashboard"
+    );
   } catch (error) {
-    return res
-      .status(500)
-      .json({ status: "error", message: "เกิดข้อผิดพลาดในการตรวจสอบ OTP" });
+    return res.error(
+      500,
+      "เกิดข้อผิดพลาดในการตรวจสอบ OTP",
+      (error as Error).message
+    );
   }
 };
 
-export const resetOtp = async (req: Request, res: Response) => {
-  const userId = jwt.verify(req.cookies.JWT_userID, JWT_SECRET) as JwtPayload;
+// ฟังก์ชันส่งอีเมล OTP
+const sendOtpEmail = async (email: string, otp: string, otpREF: string) => {
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.Trainify_Email,
+      pass: process.env.Trainify_Email_Password,
+    },
+  });
 
-  if (!userId) {
-    return res.status(400).json({ message: "กรุณาระบุ userId" });
-  }
+  const mailOptions = {
+    from: "Trainify Project <no-reply@trainify.com>",
+    to: email,
+    subject: `Trainify OTP`,
+    html: `
+      <p>รหัสอ้างอิง: ${otpREF}</p>
+      <p>รหัส OTP: <strong>${otp}</strong></p>
+      <p>กรุณาใช้รหัสนี้ภายใน 2 นาที</p>
+      <p>หากคุณไม่ได้ร้องขอ กรุณาละเลยอีเมลนี้</p>
+      <p>ขอบคุณ, ทีมงาน Trainify</p>
+    `,
+  };
 
-  try {
-    // Use findById to get a single user document
-    const user = await UserSchema.findById(userId.id);
-    if (!user) {
-      return res.status(404).json({ message: "ไม่พบผู้ใช้" });
-    }
-
-    // สร้าง OTP ใหม่
-    const newOtp = otpGenerator.generate(6, {
-      upperCaseAlphabets: false,
-      lowerCaseAlphabets: false,
-      specialChars: false,
-      digits: true,
-    });
-    const otpREF = otpGenerator.generate(6, {
-      upperCaseAlphabets: false,
-      lowerCaseAlphabets: true,
-      specialChars: false,
-      digits: true,
-    });
-
-    await sendOtpEmail(decryptData(user.email), newOtp, otpREF);
-    const currentTime = Date.now();
-    const otpCooldown = 120000; // 2 นาที
-    user.otp = newOtp;
-    user.otpExpires = Date.now() + 120000;
-    user.lastOtpSentTime = new Date();
-    await user.save();
-
-    res.status(200).json({
-      message: "OTP ใหม่ถูกส่งไปยังอีเมลของคุณ",
-      ref: `${otpREF}`,
-      time: `${
-        (otpCooldown - (currentTime - user.lastOtpSentTime.getTime())) / 1000
-      }`,
-      userID: user._id,
-    });
-  } catch (error) {
-    res.status(500).json({ message: "เกิดข้อผิดพลาดในการรีเซ็ต OTP", error });
-  }
+  await transporter.sendMail(mailOptions);
+  console.log(`OTP ถูกส่งไปยังอีเมล: ${email}`);
 };

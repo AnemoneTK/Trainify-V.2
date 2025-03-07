@@ -5,13 +5,11 @@ import CustomLocale from "./components/CustomLocale";
 import { UserProvider } from "./contexts/UserContext";
 // import pages for route
 import SelectRole from "./pages/SelectRole";
-import EmpLogin from "./pages/emp/EmpLogin";
-import AdminLogin from "./pages/admin/AdminLogin";
+import Login from "./pages/Login";
 import EmpLayout from "./layout/emp/EmpLayout";
 import EmpDashboard from "./pages/emp/dashboard/Dashboard";
-import Empschedule from "./pages/emp/schedule/Schedule";
-import Enmpmycourse from "./pages/emp/mycourse/Mycourse";
-import Course from "./pages/emp/courseadd/Course";
+import AllCourse from "./pages/emp/AllCourse";
+import RegisteredCourse from "./pages/emp/RegisteredCourse";
 import AdminLayout from "./layout/admin/AdminLayout";
 import SaAdminLayout from "./layout/superadmin/SaAdminLayout";
 
@@ -19,16 +17,13 @@ import Policy from "./pages/Policy";
 
 // Admin Route Page
 import AdminDashboard from "./pages/admin/dashboard/Dashboard";
-import EmpList from "./pages/admin/empList/EmpList";
-import AdminList from "./pages/admin/empList/AdminList";
 
 // SuperAdmin Route Page
-import SuperAdminLogin from "./pages/superadmin/SALogin"
 import SuperAdminDashboard from "./pages/superadmin/dashboard/Dashboard";
 import SaEmpList from "./pages/superadmin/empAccount/SaEmpList";
 import SaAdminList from "./pages/superadmin/empAccount/SaAdminList";
 
-import Otp from "./components/Otp";
+import Otp from "./pages/Otp";
 
 function App() {
   return (
@@ -37,8 +32,7 @@ function App() {
         <UserProvider>
           <Routes>
             <Route path="/" element={<SelectRole />} />
-            <Route path="/emp_login" element={<EmpLogin />} />
-            <Route path="/admin_login" element={<AdminLogin />} />
+            <Route path="/login" element={<Login />} />
             <Route path="/policy" element={<Policy />} />
             <Route path="/otp" element={<Otp />} />
 
@@ -52,26 +46,18 @@ function App() {
               }
             />
             <Route
-              path="/schedule"
-              element={
-                <EmpLayout>
-                  <Empschedule />
-                </EmpLayout>
-              }
-            />
-            <Route
-              path="/my_course"
-              element={
-                <EmpLayout>
-                  <Enmpmycourse />
-                </EmpLayout>
-              }
-            />
-            <Route
               path="/courses"
               element={
                 <EmpLayout>
-                  <Course />
+                  <AllCourse />
+                </EmpLayout>
+              }
+            />
+            <Route
+              path="/register_courses"
+              element={
+                <EmpLayout>
+                  <RegisteredCourse />
                 </EmpLayout>
               }
             />
@@ -84,29 +70,9 @@ function App() {
                 </AdminLayout>
               }
             />
-            <Route
-              path="/emp_list"
-              element={
-                <AdminLayout>
-                  <EmpList />
-                </AdminLayout>
-              }
-            />
-            <Route
-              path="/admin_list"
-              element={
-                <AdminLayout>
-                  <AdminList />
-                </AdminLayout>
-              }
-            />
+
             {/* หน้า superadmin */}
-            <Route
-              path="/sa_login"
-              element={
-                  <SuperAdminLogin />
-              }
-            />
+
             <Route
               path="/sa_dashboard"
               element={

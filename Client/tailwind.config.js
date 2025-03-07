@@ -9,15 +9,30 @@ export default {
       },
     },
     colors: {
-      background: "#F6F4F5",
-      primary: "#14121F",
-      white: "#FFFF",
-      dark_blur: "#04132A",
-      employee: "#0179FE",
-      admin: "#6A5DAD",
-      "admin-pink": "#FD84A9",
-      "yellow-orange": "#FFA500",
-      orange: "#FF7600",
+      bg: "#F5F5F5",
+      black: "#212121",
+      darkGray: "#757575",
+
+      emp: {
+        primary: "#2196F3",
+        secondary: "#BBDEFB",
+        accent: "#1976D2",
+      },
+
+      admin: {
+        primary: "#4CAF50",
+        secondary: "#C8E6C9",
+        accent: "#388E3C",
+      },
+
+      sa: {
+        primary: "#FFA143",
+        accent: "#FF6320",
+        secondary: "#FFE1B5",
+      },
+
+      danger: "#F44336",
+      white: "#FFFFFF",
     },
   },
   plugins: [],

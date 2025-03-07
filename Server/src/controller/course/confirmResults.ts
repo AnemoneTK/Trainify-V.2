@@ -1,70 +1,66 @@
 import {
   Request,
   Response,
-  jwt,
-  JwtPayload,
   CourseSchema,
   UserSchema,
-  UserLogSchema,
   JWT_SECRET,
-  nodemailer,
+  jwt,
   decryptData,
+  nodemailer,
 } from "../../utils/constants";
-
 import Registration from "../../models/registrationSchema";
 import User from "../../models/userSchema";
 import Course from "../../models/courseSchema";
 
 export const confirmTrainingResults = async (req: Request, res: Response) => {
-  const { courseId, results } = req.body;
-  const authHeader = req.cookies?.token;
-
-  if (!authHeader) {
-    return res.status(401).json({
-      status: "Unauthorized",
-      message: "ไม่พบ token",
-    });
-  }
-
   try {
-    const decodedToken = jwt.verify(authHeader, JWT_SECRET) as JwtPayload;
+    const sessionData = (req.session as any)?.userData;
+    if (!sessionData) {
+      return res.error(401, "Session หมดอายุ กรุณาเข้าสู่ระบบใหม่");
+    }
 
-    if (decodedToken.role !== "admin") {
-      return res.status(403).json({
-        status: "Forbidden",
-        message: "คุณไม่มีสิทธิ์ในการยืนยันผลการอบรม",
-      });
+    // ตรวจสอบสิทธิ์เฉพาะ admin เท่านั้น
+    if (sessionData.role !== "admin") {
+      return res.error(403, "คุณไม่มีสิทธิ์ในการยืนยันผลการอบรม");
+    }
+
+    const { courseId, results } = req.body;
+    if (!courseId || !results) {
+      return res.error(400, "กรุณาระบุ courseId และผลการอบรมให้ครบถ้วน");
     }
 
     const course = await Course.findById(courseId);
     if (!course) {
-      return res.status(404).json({
-        status: "Error",
-        message: "ไม่พบคอร์ส",
-      });
+      return res.error(404, "ไม่พบคอร์ส");
     }
 
     for (const { id, result } of results) {
       const user = await User.findById(id);
       if (!user) {
-        continue; //ถ้าไม่เจอข้ามไป
+        continue; // ถ้าไม่พบให้ข้ามไป
       }
 
       const registration = await Registration.findOne({
         courseId: courseId,
         userId: id,
-        status: "registered",
+        status: "wait",
       });
 
       if (registration) {
-        registration.status = result === "passed" ? "passed" : "failed";
-        registration.passedAt = new Date();
-
-        if (registration.status === "passed") {
+        if (result === "passed") {
+          registration.status = "passed";
+          registration.passedAt = new Date();
           registration.expiryDate = new Date(registration.passedAt);
           registration.expiryDate.setFullYear(
             registration.passedAt.getFullYear() + 1
           );
+        } else if (result === "not-attended") {
+          registration.status = "not-attended";
+          registration.passedAt = new Date();
+          // คุณอาจไม่ต้องกำหนด expiryDateสำหรับกรณีนี้
+        } else {
+          registration.status = "failed";
+          registration.passedAt = new Date();
         }
         await registration.save();
 
@@ -76,19 +72,14 @@ export const confirmTrainingResults = async (req: Request, res: Response) => {
         );
       }
     }
-
-    return res.status(200).json({
-      status: "Success",
-      message: "ยืนยันผลการอบรมสำเร็จ",
-    });
+    // หลังจากยืนยันผลการอบรมแล้ว ให้เปลี่ยนสถานะหลักสูตรเป็น "close"
+    await Course.findByIdAndUpdate(courseId, { status: "close" });
+    console.log(`หลักสูตรที่มี ID ${courseId} ถูกอัปเดตสถานะเป็น "close"`);
+    return res.success("ยืนยันผลการอบรมสำเร็จ");
   } catch (error) {
     const err = error as Error;
-    console.error("Error confirming training results:", error);
-    return res.status(500).json({
-      status: "Error",
-      message: "เกิดข้อผิดพลาดในการยืนยันผลการอบรม",
-      error: err.message,
-    });
+    console.error("Error confirming training results:", err.message);
+    return res.error(500, "เกิดข้อผิดพลาดในการยืนยันผลการอบรม", err.message);
   }
 };
 
@@ -98,10 +89,17 @@ const sendResultEmail = async (
   courseTitle: string,
   result: string
 ) => {
-  const subject = result === "passed" ? "คุณผ่านการอบรม" : "คุณไม่ผ่านการอบรม";
+  const subject =
+    result === "passed"
+      ? "คุณผ่านการอบรม"
+      : result === "not-attended"
+      ? "คุณไม่ได้เข้ารับการอบรม"
+      : "คุณไม่ผ่านการอบรม";
   const resultMessage =
     result === "passed"
       ? `ยินดีด้วย! คุณได้ผ่านการอบรมคอร์ส ${courseTitle} สำเร็จแล้ว`
+      : result === "not-attended"
+      ? `คุณไม่ได้เข้ารับการอบรมคอร์ส ${courseTitle}`
       : `ขอแสดงความเสียใจ! คุณไม่ผ่านการอบรมคอร์ส ${courseTitle}`;
 
   const mailOptions = {
@@ -109,10 +107,10 @@ const sendResultEmail = async (
     to: email,
     subject: subject,
     html: `
-        <p>สวัสดีคุณ ${firstName},</p>
-        <p>${resultMessage}</p>
-        <p>ขอบคุณ,<br>ทีมงาน Trainify</p>
-      `,
+      <p>สวัสดีคุณ ${firstName},</p>
+      <p>${resultMessage}</p>
+      <p>ขอบคุณ,<br>ทีมงาน Trainify</p>
+    `,
   };
 
   try {
