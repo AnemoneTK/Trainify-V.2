@@ -1,6 +1,5 @@
 import Logo from "/Logo-BG-03.png";
 import Profile from "./Profile";
-import Notification from "./Notification";
 import { useEffect } from "react";
 import PropTypes from "prop-types";
 
@@ -74,7 +73,7 @@ export default function AdminLayout({ children }) {
               </div>
             </div>
             <div className="flex flex-1 items-center justify-end gap-[2rem]  text-primary">
-              <Notification />
+              {/* <Notification /> */}
               <Profile />
             </div>
           </Header>

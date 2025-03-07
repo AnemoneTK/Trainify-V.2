@@ -117,3 +117,69 @@ export const getCourse = async (req: Request, res: Response) => {
     );
   }
 };
+
+export const getEndedCourses = async (req: Request, res: Response) => {
+  try {
+    const sessionData = (req.session as any)?.userData;
+    if (!sessionData) {
+      return res.error(401, "Session หมดอายุ กรุณาเข้าสู่ระบบใหม่");
+    }
+
+    // ตรวจสอบว่าเป็น admin หรือไม่
+    if (sessionData.role !== "admin") {
+      return res.error(403, "คุณไม่มีสิทธิ์เข้าถึงข้อมูลนี้");
+    }
+
+    // ค้นหาคอร์สที่มีสถานะเป็น "end" (จบการอบรม)
+    const courses = await Course.find({
+      status: { $in: ["end", "close"] },
+    }).populate("tag");
+
+    if (!courses || courses.length === 0) {
+      return res.success("ไม่มีคอร์สที่จบการอบรมแล้ว");
+    }
+
+    // ตรวจสอบจำนวนที่นั่งว่างในแต่ละคอร์ส
+    for (const course of courses) {
+      let allFull = true;
+      for (const schedule of course.schedule) {
+        schedule.times = await Promise.all(
+          schedule.times.map(async (timeSlot: any) => {
+            const totalSeats = timeSlot.seat;
+            const registeredSeats = await Registration.countDocuments({
+              courseId: course._id,
+              date: schedule.date,
+              "timeSlot.start": timeSlot.start,
+              "timeSlot.end": timeSlot.end,
+              status: "registered",
+            });
+
+            const availableSeats = totalSeats - registeredSeats;
+            const updatedTimeSlot = { ...timeSlot, availableSeats };
+            if (availableSeats > 0) {
+              allFull = false;
+            }
+            return updatedTimeSlot;
+          })
+        );
+      }
+      // เพิ่มสถานะ availabilityStatus ให้กับคอร์ส
+      course.availabilityStatus = allFull ? false : true;
+    }
+    const allCount = courses.length;
+    const endCount = courses.filter((course) => course.status === "end").length;
+    const closeCount = courses.filter(
+      (course) => course.status === "close"
+    ).length;
+    return res.success("ดึงข้อมูลคอร์สที่จบการอบรมสำเร็จ", {
+      count: { all: allCount, end: endCount, close: closeCount },
+      data: courses,
+    });
+  } catch (error) {
+    return res.error(
+      500,
+      "เกิดข้อผิดพลาดในการดึงข้อมูลคอร์สที่จบการอบรม",
+      (error as Error).message
+    );
+  }
+};

@@ -251,7 +251,12 @@ export default function CourseModal({ visible, onClose, data }) {
       width={1000}
       style={{ top: 20 }}
     >
-      <Form form={form} layout="vertical" initialValues={blackData}>
+      <Form
+        form={form}
+        layout="vertical"
+        initialValues={blackData}
+        disabled={data?.status == "end"}
+      >
         {/* Banner */}
         <Form.Item label={imageUrl ? "" : "อัปโหลดรูปภาพ"}>
           {imageUrl ? (

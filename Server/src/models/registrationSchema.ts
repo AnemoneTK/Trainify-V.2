@@ -11,7 +11,9 @@ interface RegistrationDocument extends Document {
     | "passed"
     | "failed"
     | "expire"
-    | "extend";
+    | "extend"
+    | "not-attended"
+    | "wait";
   registeredAt: Date;
   passedAt?: Date;
   expiryDate?: Date;

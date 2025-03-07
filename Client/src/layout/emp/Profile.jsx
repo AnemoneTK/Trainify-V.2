@@ -26,17 +26,6 @@ export default function Profile() {
       type: "divider",
     },
     {
-      label: <a href="https://www.antgroup.com">Profile</a>,
-      key: "1",
-    },
-    {
-      label: <a href="https://www.aliyun.com">Settings</a>,
-      key: "2",
-    },
-    {
-      type: "divider",
-    },
-    {
       label: (
         <Button
           className="w-full text-left text-red-600"

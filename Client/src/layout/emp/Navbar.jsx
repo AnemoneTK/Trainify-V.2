@@ -1,7 +1,7 @@
 import Logo from "/Logo-BG-03.png";
 import { Layout } from "antd";
 import Profile from "./Profile";
-import Notification from "./Notification";
+// import Notification from "./Notification";
 import PropTypes from "prop-types";
 
 const { Header } = Layout;
@@ -13,9 +13,9 @@ const Navbar = () => {
         <div className="text-2xl font-extrabold text-white">Trainify</div>
       </div>
       <div className=" relative flex flex-row items-center justify-center gap-5">
-        <div className=" absolute -left-8 md:-left-12 flex items-center justify-center">
+        {/* <div className=" absolute -left-8 md:-left-12 flex items-center justify-center">
           <Notification />
-        </div>
+        </div> */}
         <Profile />
       </div>
     </Header>

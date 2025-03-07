@@ -11,6 +11,7 @@ import authRoutes from "./routes/authRoutes";
 import courseRoutes from "./routes/courseRoutes";
 import errorHandler from "./middlewares/errorHandler";
 import { checkExpiryAndNotify } from "./controller/course/expiryCourseEmail";
+import { checkAndUpdateCourseStatus } from "./controller/course/closeCourse";
 import formatResponse from "./middlewares/formatResponse";
 const app = express();
 app.use(express.json());
@@ -76,5 +77,6 @@ app.use("/auth", authRoutes);
 
 // รันทุกวันเวลาเที่ยงคืน
 cron.schedule("0 0 * * *", checkExpiryAndNotify);
+cron.schedule("0 0 * * *", checkAndUpdateCourseStatus);
 
 export default app;

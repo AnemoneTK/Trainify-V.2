@@ -19,12 +19,13 @@ export default function RegisteredCourse() {
   const fetchRegisteredCourses = async () => {
     try {
       const response = await callApi({
-        path: "/api/course/user_register_details", // Replace with your API endpoint
+        path: "/api/course/user_register_details",
         method: "post",
         value: {},
       });
 
       if (response?.data) {
+        console.log(response)
         const courses = response.data.courses;
         setRegisteredCourses(courses);
         setFilteredCourses(courses);
@@ -58,34 +59,7 @@ export default function RegisteredCourse() {
     }
   };
 
-  const columns = [
-    {
-      title: "หลักสูตร",
-      dataIndex: "courseTitle",
-      key: "courseTitle",
-      render: (text) => <span className="font-semibold">{text}</span>,
-    },
-
-    {
-      title: "สถานที่",
-      dataIndex: "coursePlace",
-      key: "coursePlace",
-      render: (text) => <span className="text-gray-600">{text}</span>,
-    },
-    {
-      title: "สถานะ",
-      dataIndex: "status",
-      key: "status",
-      render: (status) => {
-        if (status === "passed") {
-          return <Tag color="green">ผ่าน</Tag>;
-        } else if (status === "expired") {
-          return <Tag color="red">หมดอายุ</Tag>;
-        }
-        return <Tag color="orange">รอการยืนยัน</Tag>;
-      },
-    },
-  ];
+  
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
@@ -131,7 +105,43 @@ export default function RegisteredCourse() {
       {/* Table for Registered Courses */}
       <div className="bg-white shadow-lg rounded-lg p-4 max-h-[70vh] overflow-auto">
         <Table
-          columns={columns}
+          columns={ [
+            {
+              title: "หลักสูตร",
+              dataIndex: "courseTitle",
+              key: "courseTitle",
+              render: (text) => <span className="font-semibold">{text}</span>,
+            },
+        
+            {
+              title: "สถานที่",
+              dataIndex: "coursePlace",
+              key: "coursePlace",
+              render: (text) => <span className="text-gray-600">{text}</span>,
+            },
+            {
+              title: "สถานะ",
+              dataIndex: "status",
+              key: "status",
+              render: (status) => {
+                if (status === "passed") {
+                  return <Tag color="green">ผ่าน</Tag>;
+                } else if (status === "expired") {
+                  return <Tag color="red">หมดอายุ</Tag>;
+                }else if (status === "registered") {
+                  return <Tag color="blue">ลงทะเบียนแล้ว</Tag>;
+                }else if (status === "cancelled") {
+                  return <Tag color="orange">ยกเลิก</Tag>;
+                }else if (status === "extend") {
+                  return <Tag color="purple">ต่ออายุแล้ว</Tag>;
+                }else if (status === "wait") {
+                  return <Tag color="lime">รอการยืนยัน</Tag>;
+                }else if (status === "failed") {
+                  return <Tag color="volcano">ไม่ผ่าน</Tag>;
+                }
+              },
+            },
+          ]}
           dataSource={filteredCourses}
           rowKey="courseId"
           pagination={false}
