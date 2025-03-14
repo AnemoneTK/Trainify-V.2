@@ -4,26 +4,22 @@ import { RiAccountCircleFill } from "react-icons/ri";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router";
 import { useUser } from "../../contexts/UserContext";
-import { useEffect } from "react";
 import callApi from "../../utils/axios";
 export default function Profile() {
   const { userData } = useUser();
-  useEffect(() => {
-    console.log("userData", userData);
-  }, [userData]);
+
   const dropdownItems = [
-    {
-      label: (
-        <div>
-          <div className=" text-xl font-bold">{userData?.fullName}</div>
-          <div>{userData?.email}</div>
-        </div>
-      ),
-      key: "0",
-    },
-    {
-      type: "divider",
-    },
+    // {
+    //   label: <a href="https://www.antgroup.com">Profile</a>,
+    //   key: "0",
+    // },
+    // {
+    //   label: <a href="https://www.aliyun.com">Settings</a>,
+    //   key: "1",
+    // },
+    // {
+    //   type: "divider",
+    // },
     {
       label: (
         <Button
@@ -51,7 +47,6 @@ export default function Profile() {
     console.log(response);
     navigate("/");
   };
-
   const menu = <Menu items={dropdownItems} />;
 
   return (
@@ -63,7 +58,7 @@ export default function Profile() {
         className="flex"
       >
         <a onClick={(e) => e.preventDefault()}>
-          <Space className="text-white">
+          <Space className="text-primary">
             <RiAccountCircleFill className="text-4xl " />
             <div className=" hidden md:flex md:flex-row  gap-2">
               <div>{userData?.fullName}</div>

@@ -31,15 +31,15 @@ export default function Dashboard() {
   useEffect(() => {
     getCourses();
     getCoursesRegis();
-    setSelectedDate(dayjs());
     handleDateSelect(dayjs());
   }, []);
+
   useEffect(() => {
     console.log(courses);
   }, [courses]);
   useEffect(() => {
-    console.log("schedule", schedule);
-  }, [schedule]);
+    console.log("selectedDate", selectedDate);
+  }, [selectedDate]);
 
   const getCourses = async () => {
     try {

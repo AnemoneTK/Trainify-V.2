@@ -76,6 +76,7 @@ export const getUserRegistrations = async (req: Request, res: Response) => {
         registrationDate: registration.date,
         status: registration.status,
         timeSlot: registration.timeSlot,
+        expiryDate: registration.expiryDate,
       };
     });
 

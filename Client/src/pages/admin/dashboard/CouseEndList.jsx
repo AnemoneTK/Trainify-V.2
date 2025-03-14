@@ -126,7 +126,7 @@ export default function CourseEndList({ setEndCourse }) {
           type={statusFilter === "end" ? "primary" : "default"}
           onClick={() => setStatusFilter("end")}
         >
-          รออนุมัติ{" "}
+          รอยืนยันผล{" "}
           <Badge
             color="red"
             count={counts.end || 0}
@@ -137,7 +137,7 @@ export default function CourseEndList({ setEndCourse }) {
           type={statusFilter === "close" ? "primary" : "default"}
           onClick={() => setStatusFilter("close")}
         >
-          อนุมัติแล้ว{" "}
+          ยืนยันแล้ว{" "}
           <Badge
             color="green"
             count={counts.close || 0}
@@ -183,11 +183,11 @@ export default function CourseEndList({ setEndCourse }) {
             break;
           case "close":
             color = "red";
-            text = "ปิดรับสมัคร";
+            text = "ยืนยันแล้ว";
             break;
           case "end":
             color = "blue";
-            text = "จบการอบรม";
+            text = "รอยืนยันผล";
             break;
           case "deleted":
             color = "gray";

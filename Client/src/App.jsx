@@ -11,7 +11,7 @@ import EmpDashboard from "./pages/emp/dashboard/Dashboard";
 import AllCourse from "./pages/emp/AllCourse";
 import RegisteredCourse from "./pages/emp/RegisteredCourse";
 import AdminLayout from "./layout/admin/AdminLayout";
-import SaAdminLayout from "./layout/superadmin/SaAdminLayout";
+import SuperAdminLayout from "./layout/superadmin/SaAdminLayout";
 
 import Policy from "./pages/Policy";
 
@@ -76,25 +76,25 @@ function App() {
             <Route
               path="/sa_dashboard"
               element={
-                <SaAdminLayout>
+                <SuperAdminLayout>
                   <SuperAdminDashboard />
-                </SaAdminLayout>
+                </SuperAdminLayout>
               }
             />
             <Route
               path="/all_list"
               element={
-                <SaAdminLayout>
+                <SuperAdminLayout>
                   <SaEmpList />
-                </SaAdminLayout>
+                </SuperAdminLayout>
               }
             />
             <Route
               path="/Saadmin_list"
               element={
-                <SaAdminLayout>
+                <SuperAdminLayout>
                   <SaAdminList />
-                </SaAdminLayout>
+                </SuperAdminLayout>
               }
             />
           </Routes>

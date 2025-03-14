@@ -2,7 +2,16 @@ import { useEffect, useState } from "react";
 import { Table, Button, Tag, message, Space, Input } from "antd";
 import callApi from "../../utils/axios";
 import { LeftOutlined } from "@ant-design/icons";
-
+import {
+  CheckOutlined,
+  CloseOutlined,
+  ClockCircleOutlined,
+  UserOutlined,
+  SyncOutlined,
+  StopOutlined,
+  CloseCircleOutlined,
+} from "@ant-design/icons";
+import dayjs from "dayjs";
 export default function RegisteredCourse() {
   const [registeredCourses, setRegisteredCourses] = useState([]);
   const [filteredCourses, setFilteredCourses] = useState([]);
@@ -25,7 +34,7 @@ export default function RegisteredCourse() {
       });
 
       if (response?.data) {
-        console.log(response)
+        console.log(response);
         const courses = response.data.courses;
         setRegisteredCourses(courses);
         setFilteredCourses(courses);
@@ -58,8 +67,6 @@ export default function RegisteredCourse() {
       setFilteredCourses(filtered);
     }
   };
-
-  
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
@@ -105,14 +112,13 @@ export default function RegisteredCourse() {
       {/* Table for Registered Courses */}
       <div className="bg-white shadow-lg rounded-lg p-4 max-h-[70vh] overflow-auto">
         <Table
-          columns={ [
+          columns={[
             {
               title: "หลักสูตร",
               dataIndex: "courseTitle",
               key: "courseTitle",
               render: (text) => <span className="font-semibold">{text}</span>,
             },
-        
             {
               title: "สถานที่",
               dataIndex: "coursePlace",
@@ -125,20 +131,79 @@ export default function RegisteredCourse() {
               key: "status",
               render: (status) => {
                 if (status === "passed") {
-                  return <Tag color="green">ผ่าน</Tag>;
+                  return (
+                    <Tag color="green" size="large">
+                      <CheckOutlined /> ผ่าน
+                    </Tag>
+                  );
                 } else if (status === "expired") {
-                  return <Tag color="red">หมดอายุ</Tag>;
-                }else if (status === "registered") {
-                  return <Tag color="blue">ลงทะเบียนแล้ว</Tag>;
-                }else if (status === "cancelled") {
-                  return <Tag color="orange">ยกเลิก</Tag>;
-                }else if (status === "extend") {
-                  return <Tag color="purple">ต่ออายุแล้ว</Tag>;
-                }else if (status === "wait") {
-                  return <Tag color="lime">รอการยืนยัน</Tag>;
-                }else if (status === "failed") {
-                  return <Tag color="volcano">ไม่ผ่าน</Tag>;
+                  return (
+                    <Tag color="red" size="large">
+                      <CloseCircleOutlined /> หมดอายุ
+                    </Tag>
+                  );
+                } else if (status === "registered") {
+                  return (
+                    <Tag color="blue" size="large">
+                      <UserOutlined /> ลงทะเบียนแล้ว
+                    </Tag>
+                  );
+                } else if (status === "cancelled") {
+                  return (
+                    <Tag color="orange" size="large">
+                      <StopOutlined /> ยกเลิก
+                    </Tag>
+                  );
+                } else if (status === "extend") {
+                  return (
+                    <Tag color="purple" size="large">
+                      <SyncOutlined /> ต่ออายุแล้ว
+                    </Tag>
+                  );
+                } else if (status === "wait") {
+                  return (
+                    <Tag color="magenta" size="large">
+                      <ClockCircleOutlined /> รอการยืนยัน
+                    </Tag>
+                  );
+                } else if (status === "failed") {
+                  return (
+                    <Tag color="volcano" size="large">
+                      <CloseOutlined /> ไม่ผ่าน
+                    </Tag>
+                  );
+                } else {
+                  return <Tag size="large">ไม่ระบุ</Tag>;
                 }
+              },
+            },
+            {
+              title: "วันหมดอายุ",
+              dataIndex: "expiryDate",
+              key: "expiryDate",
+              render: (text) => {
+                if (!text)
+                  return <span className="text-darkGray ">รอการยืนยัน</span>;
+
+                const expiry = dayjs(text);
+                const now = dayjs();
+                const diffDays = expiry.diff(now, "day");
+                let colorClass = "text-gray-600";
+
+                if (expiry.isBefore(now, "day")) {
+                  // วันหมดอายุผ่านไปแล้ว
+                  colorClass = "text-danger font-bold";
+                } else if (diffDays < 30) {
+                  // หมดในอีก 30 วัน (ประมาณ 1 เดือน)
+                  colorClass = "text-sa-accent font-bold";
+                }
+
+                return (
+                  <span className={`${colorClass} `}>
+                    {expiry.format("DD MMM YYYY")}{" "}
+                    {diffDays >= 0 ? `(อีก ${diffDays} วัน)` : `(หมดอายุแล้ว)`}
+                  </span>
+                );
               },
             },
           ]}
