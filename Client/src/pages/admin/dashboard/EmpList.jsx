@@ -19,6 +19,7 @@ dayjs.extend(buddhistEra);
 dayjs.locale("th");
 import callApi from "../../../utils/axios";
 import UserModal from "../../../components/UserModal";
+// import DepartmentModal from "../../../components/DepartmentModal";
 
 export default function EmpList() {
   const { userData } = useUser();
@@ -33,15 +34,25 @@ export default function EmpList() {
 
   const [search, setSearch] = useState("");
 
+  const [department, setDepartment] = useState(null);
+
+  // const [departmentModal,setDepartmentModal]=useState(false)
+
   useEffect(() => {
     if (users) {
       console.log("users", users);
     }
   }, [users]);
+  useEffect(() => {
+    if (department) {
+      console.log("department", department);
+    }
+  }, [department]);
 
   useEffect(() => {
     if (userData) {
       get_users();
+      get_department();
     }
   }, [userData]);
 
@@ -75,6 +86,36 @@ export default function EmpList() {
           key: item.id || index + 1,
         }))
       );
+      setSpinning(false);
+    } catch (error) {
+      console.log("errorResponse", error);
+      if (error.statusCode === 400 || error.statusCode === 401) {
+        Swal.fire({
+          title: `${error.message}`,
+          message: `${error.error}`,
+          icon: `${error.icon}`,
+          confirmButtonText: "ตกลง",
+        }).then(() => {
+          if (error.statusCode === 401) {
+            navigate("/");
+          }
+        });
+      } else {
+        navigate("/");
+      }
+    }
+  };
+  const get_department = async () => {
+    try {
+      setSpinning(true);
+      const response = await callApi({
+        path: "/api/users/get_department",
+        method: "get",
+        value: {},
+      });
+
+      console.log("get_department", response);
+      setDepartment(response.data);
       setSpinning(false);
     } catch (error) {
       console.log("errorResponse", error);
@@ -156,6 +197,11 @@ export default function EmpList() {
     setSelectedUser(null);
     get_users();
   };
+  // const departmentClose = () => {
+  //   setDepartmentModal(false);
+  //   get_users();
+  //   get_department()
+  // };
 
   return (
     <>
@@ -186,9 +232,9 @@ export default function EmpList() {
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-            <div>
-              <Button>ตั้งค่าอื่นๆ</Button>
-            </div>
+            {/* <div>
+              <Button id="btn_other_option" onClick={()=>setDepartmentModal(true)}>ตั้งค่าอื่นๆ</Button>
+            </div> */}
           </div>
           <div>
             <Spin spinning={spinning}>
@@ -327,7 +373,9 @@ export default function EmpList() {
                     width: 200,
                     responsive: ["sm"],
                     filters: Array.from(
-                      new Set((users || [])?.map((user) => user.department))
+                      new Set(
+                        (department || [])?.map((department) => department.name)
+                      )
                     ).map((department) => ({
                       text: department,
                       value: department,
@@ -340,9 +388,16 @@ export default function EmpList() {
                       confirm,
                       clearFilters,
                     }) => (
-                      <div style={{ padding: 8 }}>
+                      <div
+                        style={{ padding: 8 }}
+                        className="flex flex-col gap-2"
+                      >
                         {Array.from(
-                          new Set((users || [])?.map((user) => user.department))
+                          new Set(
+                            (department || [])?.map(
+                              (department) => department.name
+                            )
+                          )
                         ).map((department) => (
                           <Checkbox
                             key={department}
@@ -479,6 +534,10 @@ export default function EmpList() {
         onClose={closeModal}
         data={selectedUser}
       />
+
+      {/* <DepartmentModal
+       visible={departmentModal}
+       onClose={departmentClose}/> */}
     </>
   );
 }

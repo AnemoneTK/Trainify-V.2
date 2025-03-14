@@ -7,6 +7,7 @@ import {
   Spin,
   Switch,
   notification,
+  Tag
 } from "antd";
 import Swal from "sweetalert2";
 import { useUser } from "../../../contexts/UserContext";
@@ -160,8 +161,6 @@ export default function EmpList() {
   return (
     <>
       <div>
-        {/* <ListHeader /> */}
-
         <div className="flex flex-row md:flex-row items-end justify-between">
           <div>
             <div className="text-2xl font-bold">
@@ -186,9 +185,9 @@ export default function EmpList() {
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-            <div>
+            {/* <div>
               <Button>ตั้งค่าอื่นๆ</Button>
-            </div>
+            </div> */}
           </div>
           <div>
             <Spin spinning={spinning}>
@@ -332,6 +331,24 @@ export default function EmpList() {
                       text: role,
                       value: role,
                     })),
+                    render: (text) => {
+                      let color = '';
+                      let label = '';
+                  
+                      if (text === 'employee') {
+                        color = 'blue';
+                        label = 'พนักงาน';
+                      } else if (text === 'admin') {
+                        color = 'green';
+                        label = 'ผู้ดูแล';
+                      } else if (text === 'super_admin') {
+                        color = 'red';
+                        label = 'ผู้ดูแลระบบ';
+                      }
+                  
+                      // Return the Tag component
+                      return <Tag color={color}>{label}</Tag>;
+                    },
                     defaultSortOrder: "descend",
                     onFilter: (value, record) => record.role === value,
                     filterDropdown: ({
@@ -352,7 +369,7 @@ export default function EmpList() {
                               setSelectedKeys(e.target.checked ? [role] : []);
                             }}
                           >
-                            {role}
+                            {role == 'employee' ? "พนักงาน" : role=='admin'? "ผู้ดูแล":"ผู้ดูแลระบบ"}
                           </Checkbox>
                         ))}
                         <div className="flex justify-between mt-2 pt-1">
@@ -443,6 +460,22 @@ export default function EmpList() {
                       dayjs(a.startDate).isBefore(dayjs(b.startDate)) ? -1 : 1, // การจัดเรียงโดยใช้ dayjs
                     render: (startDate) => {
                       return dayjs(startDate).format("DD/MM/YYYY"); // แสดงวันที่ในรูปแบบ วัน/เดือน/ปี
+                    },
+                  },
+                  {
+                    title: "สร้างโดย",
+                    dataIndex: "createdBy",
+                    sorter: (a, b) => a.createdBy.localeCompare(b.createdBy),
+                    render: (text, record) => {
+                      return `${record.createdBy}`;
+                    },
+                  },
+                  {
+                    title: "ยืนยันโดย",
+                    dataIndex: "confirmedBy",
+                    sorter: (a, b) => a.confirmedBy.localeCompare(b.confirmedBy),
+                    render: (text, record) => {
+                      return `${record.confirmedBy}`;
                     },
                   },
                   {

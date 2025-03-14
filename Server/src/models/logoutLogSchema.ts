@@ -1,7 +1,8 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document, Types } from "mongoose";
+import User from "./userSchema";
 
 interface LogDocument extends Document {
-  userId: object;
+  userId: Types.ObjectId;
   email: string;
   reason: string;
   ip: string;
@@ -9,8 +10,8 @@ interface LogDocument extends Document {
 }
 const LogoutLogSchema = new Schema<LogDocument>({
   userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User ",
+    type: Schema.Types.ObjectId,
+    ref: "User", // Removed trailing space
     required: true,
   },
   email: { type: String, required: true },

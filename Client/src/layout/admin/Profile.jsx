@@ -10,17 +10,6 @@ export default function Profile() {
 
   const dropdownItems = [
     {
-      label: <a href="https://www.antgroup.com">Profile</a>,
-      key: "0",
-    },
-    {
-      label: <a href="https://www.aliyun.com">Settings</a>,
-      key: "1",
-    },
-    {
-      type: "divider",
-    },
-    {
       label: (
         <Button
           className="w-full text-left text-red-600"

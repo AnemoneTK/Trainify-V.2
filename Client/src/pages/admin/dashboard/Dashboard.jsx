@@ -3,6 +3,7 @@ import Swal from "sweetalert2";
 import EmpList from "./EmpList";
 import CourseList from "./CourseList";
 import CourseEndList from "./CouseEndList";
+import RegisCourse from "./RegisCourse";
 import { useState, useEffect } from "react";
 import callApi from "../../../utils/axios";
 import { useNavigate } from "react-router-dom";
@@ -53,6 +54,9 @@ export default function Dashboard() {
         <Tabs.TabPane tab="หลักสูตรฝึกอบรม" key="2">
           <CourseList />
         </Tabs.TabPane>
+        {/* <Tabs.TabPane tab="รายละเอียดการลงทะเบียน" key="3">
+          <RegisCourse />
+        </Tabs.TabPane> */}
         <Tabs.TabPane
           tab={
             <span>

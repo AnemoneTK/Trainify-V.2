@@ -430,6 +430,7 @@ export default function CourseModal({ visible, onClose, data }) {
                 <Form.Item>
                   <Button
                     type="dashed"
+                    id="add_schedule"
                     onClick={() => addSchedule()}
                     block
                     icon={<PlusOutlined />}
@@ -523,6 +524,7 @@ export default function CourseModal({ visible, onClose, data }) {
           )}
           <Button
             type="primary"
+            id="btn_create_course"
             loading={loading}
             onClick={handleSave}
             className="ml-auto"

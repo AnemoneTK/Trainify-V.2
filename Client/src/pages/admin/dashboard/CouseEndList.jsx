@@ -220,7 +220,6 @@ export default function CourseEndList({ setEndCourse }) {
 
   return (
     <>
-      <div className="p-4">
         <div className="flex flex-col md:flex-row items-end justify-between">
           <div>
             <div className="text-2xl font-bold">หลักสูตรที่จบแล้ว</div>
@@ -259,7 +258,6 @@ export default function CourseEndList({ setEndCourse }) {
             </Spin>
           </div>
         </div>
-      </div>
       <ConfirmResult
         visible={isModalVisible}
         onClose={closeModal}

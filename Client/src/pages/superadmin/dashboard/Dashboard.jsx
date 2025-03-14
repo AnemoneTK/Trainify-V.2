@@ -1,5 +1,6 @@
 import { Tabs } from "antd";
 import EmpList from "./EmpList";
+import Log from "./Log";
 
 export default function Dashboard() {
   return (
@@ -8,6 +9,9 @@ export default function Dashboard() {
       <Tabs defaultActiveKey="1">
         <Tabs.TabPane tab="รายชื่อพนักงาน" key="1">
           <EmpList />
+        </Tabs.TabPane>
+        <Tabs.TabPane tab="ประวัติการเข้า-ออกระบบ" key="/">
+          <Log />
         </Tabs.TabPane>
       </Tabs>
     </div>

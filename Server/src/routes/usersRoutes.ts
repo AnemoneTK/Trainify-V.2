@@ -13,6 +13,7 @@ import {
   updateDepartment,
   deleteDepartment,
 } from "../controller/department/department";
+import { getLogs } from "../controller/log/log";
 const router = express.Router();
 
 router.post("/create", createUser);
@@ -28,5 +29,7 @@ router.post("/create_department", createDepartment);
 router.get("/get_department", getDepartments);
 router.put("/update_department", updateDepartment);
 router.delete("/delete_department", deleteDepartment);
+
+router.get("/logs", getLogs);
 
 export default router;
