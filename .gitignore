@@ -1,2 +1,23 @@
 .env
 .env.docker
+
+# Root level gitignore
+node_modules/
+.env
+.DS_Store
+
+# React application
+/react-app/node_modules
+/react-app/build
+/react-app/.env
+
+# Next.js application
+/next-app/.next
+/next-app/node_modules
+/next-app/out
+/next-app/.env
+
+# New Server
+/server/node_modules
+/server/dist
+/server/.env
