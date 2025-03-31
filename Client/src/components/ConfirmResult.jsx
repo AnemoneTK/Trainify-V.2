@@ -13,6 +13,7 @@ export default function ConfirmResult({ visible, onClose, courseId }) {
   const [loading, setLoading] = useState(false);
   const [flatRegistrations, setFlatRegistrations] = useState([]);
   const [courseTitle, setCourseTitle] = useState("");
+  const [courseStatus, setCourseStatus] = useState("");
   const [results, setResults] = useState([]); // เก็บผลการเลือกสถานะในรูปแบบ { id, result }
 
   useEffect(() => {
@@ -20,6 +21,9 @@ export default function ConfirmResult({ visible, onClose, courseId }) {
       fetchRegistrations();
     }
   }, [visible, courseId]);
+  useEffect(() => {
+    console.log("courseStatus", courseStatus);
+  }, [courseStatus]);
   useEffect(() => {
     console.log("flatRegistrations", flatRegistrations);
   }, [flatRegistrations]);
@@ -41,6 +45,7 @@ export default function ConfirmResult({ visible, onClose, courseId }) {
         Object.entries(regData.data).forEach(([dateKey, groups]) => {
           groups.forEach((group) => {
             const groupCourseTitle = group.courseTitle || "";
+            setCourseStatus(group.status || "wait");
             group.users.forEach((user) => {
               const fullName = `${user.titleName || ""} ${
                 user.firstName || ""
@@ -60,6 +65,7 @@ export default function ConfirmResult({ visible, onClose, courseId }) {
 
         setFlatRegistrations(flattened);
         setCourseTitle(flattened[0]?.courseTitle || "หลักสูตร");
+
         // Initialize results state: ส่งเป็น { id, result } สำหรับแต่ละ registration
         setResults(
           flattened.map((reg) => ({ id: reg.key, result: reg.status }))
@@ -148,6 +154,7 @@ export default function ConfirmResult({ visible, onClose, courseId }) {
             value={status}
             style={{ width: 150 }}
             onChange={(value) => handleStatusChange(value, record)}
+            disabled={courseStatus == "close"}
           >
             <Select.Option value="wait">
               <span className="text-orange-600">รอการยืนยันผล</span>
@@ -179,14 +186,18 @@ export default function ConfirmResult({ visible, onClose, courseId }) {
       visible={visible}
       onCancel={() => onClose(false)}
       width={1000}
-      footer={[
-        <Button key="cancel" onClick={() => onClose(false)}>
-          ยกเลิก
-        </Button>,
-        <Button key="confirm" type="primary" onClick={confirmResult}>
-          ยืนยันผลการอบรม
-        </Button>,
-      ]}
+      footer={
+        courseStatus === "close"
+          ? "หลักสูตรนี้ได้ยืนยันผลการอบรมไปแล้ว"
+          : [
+              <Button key="cancel" onClick={() => onClose(false)}>
+                ยกเลิก
+              </Button>,
+              <Button key="confirm" type="primary" onClick={confirmResult}>
+                ยืนยันผลการอบรม
+              </Button>,
+            ]
+      }
     >
       <Spin spinning={loading}>
         <Table

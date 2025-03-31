@@ -79,7 +79,7 @@ export default function Otp() {
       console.error("CreateOtp Error", errorResponse);
       Swal.fire({
         icon: error.icon,
-        title: error.message ||"เกิดข้อผิดพลาดในการสร้าง OTP",
+        title: error.message || "เกิดข้อผิดพลาดในการสร้าง OTP",
         text: error.error || "กรุณาลองใหม่อีกครั้ง",
         confirmButtonText: "ตกลง",
       }).then(() => {
@@ -214,6 +214,7 @@ export default function Otp() {
         </div>
         <div className="flex items-center justify-center w-full px-12 ">
           <Button
+            disabled={otp < 6}
             size="large"
             variant="outlined"
             color="primary"

@@ -158,9 +158,7 @@ export const verifyOtp = async (req: Request, res: Response) => {
         ip: req.ip,
       });
       return res.error(400, "OTP ไม่ถูกต้อง", null, null, "warning");
-    }
-
-    if (!user.otpExpires || currentTime > user.otpExpires) {
+    } else if (!user.otpExpires || currentTime > user.otpExpires) {
       await LoginLogSchema.create({
         userId: user._id,
         email: decryptData(user.email),
@@ -168,6 +166,13 @@ export const verifyOtp = async (req: Request, res: Response) => {
         ip: req.ip,
       });
       return res.error(400, "OTP หมดอายุ", null, null, "warning");
+    } else {
+      await LoginLogSchema.create({
+        userId: user._id,
+        email: decryptData(user.email),
+        success: true,
+        ip: req.ip,
+      });
     }
 
     const userData = {

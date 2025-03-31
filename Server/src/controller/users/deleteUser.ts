@@ -1,13 +1,8 @@
 import {
   Request,
   Response,
-  jwt,
-  JwtPayload,
   UserSchema,
   UserLogSchema,
-  encryptData,
-  decryptData,
-  JWT_SECRET,
 } from "../../utils/constants";
 
 const User = UserSchema;
@@ -15,44 +10,35 @@ const UserLog = UserLogSchema;
 
 export const deleteUser = async (req: Request, res: Response) => {
   const { userID } = req.body;
-  const authHeader = req.cookies?.token;
 
-  if (!authHeader) {
-    return res.status(401).json({
-      status: "Unauthorized",
-      message: "ไม่พบ token",
-    });
+  // ตรวจสอบข้อมูลผู้ใช้ใน session
+  const sessionData = (req.session as any)?.userData;
+  if (!sessionData) {
+    return res.error(401, "Session หมดอายุ กรุณาเข้าสู่ระบบใหม่");
+  }
+
+  // ตรวจสอบสิทธิ์ของผู้ใช้จาก session (admin และ super_admin)
+  if (!["admin", "super_admin"].includes(sessionData.role)) {
+    return res.error(403, "คุณไม่มีสิทธิ์ในการลบบัญชีผู้ใช้");
+  }
+
+  if (!userID) {
+    return res.error(400, "กรุณาระบุ userID");
   }
 
   try {
-    const decodedToken = jwt.verify(authHeader, JWT_SECRET) as JwtPayload;
-    if (!["admin", "super_admin"].includes(decodedToken.role)) {
-      return res.status(403).json({
-        status: "Forbidden",
-        message: "คุณไม่มีสิทธิ์ในการลบบัญชีผู้ใช้",
-      });
-    }
-
-    if (!userID) {
-      return res.status(400).json({
-        status: "คำขอไม่ถูกต้อง",
-        message: "กรุณาระบุ userID",
-      });
-    }
-
     const user = await User.findById(userID);
     if (!user) {
-      return res.status(404).json({
-        status: "ไม่พบข้อมูล",
-        message: "ไม่พบผู้ใช้",
-      });
+      return res.error(404, "ไม่พบผู้ใช้");
+    }
+
+    // หาก sessionData.role เป็น "admin" ให้ตรวจสอบว่าผู้ใช้ที่จะลบมี role เป็น "employee" หรือไม่
+    if (sessionData.role === "admin" && user.role !== "employee") {
+      return res.error(403, "คุณไม่มีสิทธิ์ในการลบบัญชีผู้ใช้");
     }
 
     if (user.status === "deleted") {
-      return res.status(400).json({
-        status: "คำขอไม่ถูกต้อง",
-        message: "บัญชีผู้ใช้นี้ถูกลบไปแล้ว",
-      });
+      return res.error(400, "บัญชีผู้ใช้นี้ถูกลบไปแล้ว");
     }
 
     // อัปเดตสถานะเป็น "deleted"
@@ -64,25 +50,18 @@ export const deleteUser = async (req: Request, res: Response) => {
       action: "delete",
       userId: user._id,
       performedBy: {
-        userId: decodedToken.id,
-        name: decodedToken.fullName,
+        userId: sessionData.id,
+        name: sessionData.fullName,
       },
       changes: {
         status: "deleted",
       },
     });
 
-    // ส่ง response กลับไปยัง client
-    return res.status(200).json({
-      status: "สำเร็จ",
-      message: "ลบบัญชีผู้ใช้สำเร็จ",
-    });
+    return res.success("ลบบัญชีผู้ใช้สำเร็จ");
   } catch (error) {
     const err = error as Error;
-    return res.status(500).json({
-      status: "Error",
-      message: "เกิดข้อผิดพลาดในการลบบัญชีผู้ใช้",
-      error: err.message,
-    });
+    console.error("Error deleting user:", err.message);
+    return res.error(500, "เกิดข้อผิดพลาดในการลบบัญชีผู้ใช้", err.message);
   }
 };

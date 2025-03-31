@@ -1,6 +1,5 @@
 import { CiSearch } from "react-icons/ci";
 import { Input, Button, Table, Spin, Tag, Space, Badge } from "antd";
-import { TbFileExport } from "react-icons/tb";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
@@ -68,13 +67,20 @@ export default function CourseEndList({ setEndCourse }) {
       setSpinning(false);
     } catch (error) {
       console.log("errorResponse", error);
-      Swal.fire({
-        title: `${error.message}`,
-        icon: "error",
-        confirmButtonText: "ตกลง",
-      }).then(() => {
+      if (error.statusCode === 400 || error.statusCode === 401) {
+        Swal.fire({
+          title: `${error.message}`,
+          message: `${error.error}`,
+          icon: `${error.icon}`,
+          confirmButtonText: "ตกลง",
+        }).then(() => {
+          if (error.statusCode === 401) {
+            navigate("/");
+          }
+        });
+      } else {
         navigate("/");
-      });
+      }
       setSpinning(false);
     }
   };
@@ -120,7 +126,7 @@ export default function CourseEndList({ setEndCourse }) {
           type={statusFilter === "end" ? "primary" : "default"}
           onClick={() => setStatusFilter("end")}
         >
-          รออนุมัติ{" "}
+          รอยืนยันผล{" "}
           <Badge
             color="red"
             count={counts.end || 0}
@@ -131,7 +137,7 @@ export default function CourseEndList({ setEndCourse }) {
           type={statusFilter === "close" ? "primary" : "default"}
           onClick={() => setStatusFilter("close")}
         >
-          อนุมัติแล้ว{" "}
+          ยืนยันแล้ว{" "}
           <Badge
             color="green"
             count={counts.close || 0}
@@ -177,11 +183,11 @@ export default function CourseEndList({ setEndCourse }) {
             break;
           case "close":
             color = "red";
-            text = "ปิดรับสมัคร";
+            text = "ยืนยันแล้ว";
             break;
           case "end":
             color = "blue";
-            text = "จบการอบรม";
+            text = "รอยืนยันผล";
             break;
           case "deleted":
             color = "gray";
@@ -214,7 +220,6 @@ export default function CourseEndList({ setEndCourse }) {
 
   return (
     <>
-      <div className="p-4">
         <div className="flex flex-col md:flex-row items-end justify-between">
           <div>
             <div className="text-2xl font-bold">หลักสูตรที่จบแล้ว</div>
@@ -253,7 +258,6 @@ export default function CourseEndList({ setEndCourse }) {
             </Spin>
           </div>
         </div>
-      </div>
       <ConfirmResult
         visible={isModalVisible}
         onClose={closeModal}

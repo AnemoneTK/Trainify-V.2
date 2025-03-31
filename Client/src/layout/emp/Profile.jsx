@@ -4,11 +4,10 @@ import { RiAccountCircleFill } from "react-icons/ri";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router";
 import { useUser } from "../../contexts/UserContext";
-import axios from "axios";
 import { useEffect } from "react";
+import callApi from "../../utils/axios";
 export default function Profile() {
   const { userData } = useUser();
-  const URL = import.meta.env.VITE_BASE_URL;
   useEffect(() => {
     console.log("userData", userData);
   }, [userData]);
@@ -43,12 +42,13 @@ export default function Profile() {
   ];
   const navigate = useNavigate();
   const logout = async () => {
-    await axios.get(`${URL}/auth/logout`, {
-      withCredentials: true,
-      headers: {
-        "Content-Type": "application/json",
-      },
+    console.log("userData", userData);
+    const response = await callApi({
+      path: "/auth/logout",
+      method: "get",
+      value: {},
     });
+    console.log(response);
     navigate("/");
   };
 

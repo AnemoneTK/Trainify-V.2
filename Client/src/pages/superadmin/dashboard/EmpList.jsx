@@ -7,6 +7,7 @@ import {
   Spin,
   Switch,
   notification,
+  Tag
 } from "antd";
 import Swal from "sweetalert2";
 import { useUser } from "../../../contexts/UserContext";
@@ -19,7 +20,6 @@ dayjs.extend(buddhistEra);
 dayjs.locale("th");
 import callApi from "../../../utils/axios";
 import UserModal from "../../../components/UserModal";
-// import DepartmentModal from "../../../components/DepartmentModal";
 
 export default function EmpList() {
   const { userData } = useUser();
@@ -34,25 +34,15 @@ export default function EmpList() {
 
   const [search, setSearch] = useState("");
 
-  const [department, setDepartment] = useState(null);
-
-  // const [departmentModal,setDepartmentModal]=useState(false)
-
   useEffect(() => {
     if (users) {
       console.log("users", users);
     }
   }, [users]);
-  useEffect(() => {
-    if (department) {
-      console.log("department", department);
-    }
-  }, [department]);
 
   useEffect(() => {
     if (userData) {
       get_users();
-      get_department();
     }
   }, [userData]);
 
@@ -86,36 +76,6 @@ export default function EmpList() {
           key: item.id || index + 1,
         }))
       );
-      setSpinning(false);
-    } catch (error) {
-      console.log("errorResponse", error);
-      if (error.statusCode === 400 || error.statusCode === 401) {
-        Swal.fire({
-          title: `${error.message}`,
-          message: `${error.error}`,
-          icon: `${error.icon}`,
-          confirmButtonText: "ตกลง",
-        }).then(() => {
-          if (error.statusCode === 401) {
-            navigate("/");
-          }
-        });
-      } else {
-        navigate("/");
-      }
-    }
-  };
-  const get_department = async () => {
-    try {
-      setSpinning(true);
-      const response = await callApi({
-        path: "/api/users/get_department",
-        method: "get",
-        value: {},
-      });
-
-      console.log("get_department", response);
-      setDepartment(response.data);
       setSpinning(false);
     } catch (error) {
       console.log("errorResponse", error);
@@ -197,17 +157,10 @@ export default function EmpList() {
     setSelectedUser(null);
     get_users();
   };
-  // const departmentClose = () => {
-  //   setDepartmentModal(false);
-  //   get_users();
-  //   get_department()
-  // };
 
   return (
     <>
       <div>
-        {/* <ListHeader /> */}
-
         <div className="flex flex-row md:flex-row items-end justify-between">
           <div>
             <div className="text-2xl font-bold">
@@ -233,7 +186,7 @@ export default function EmpList() {
               />
             </div>
             {/* <div>
-              <Button id="btn_other_option" onClick={()=>setDepartmentModal(true)}>ตั้งค่าอื่นๆ</Button>
+              <Button>ตั้งค่าอื่นๆ</Button>
             </div> */}
           </div>
           <div>
@@ -368,14 +321,84 @@ export default function EmpList() {
                     },
                   },
                   {
+                    title: "ระดับบัญชี",
+                    dataIndex: "role",
+                    width: 200,
+                    responsive: ["sm"],
+                    filters: Array.from(
+                      new Set((users || []).map((user) => user.role))
+                    ).map((role) => ({
+                      text: role,
+                      value: role,
+                    })),
+                    render: (text) => {
+                      let color = '';
+                      let label = '';
+                  
+                      if (text === 'employee') {
+                        color = 'blue';
+                        label = 'พนักงาน';
+                      } else if (text === 'admin') {
+                        color = 'green';
+                        label = 'ผู้ดูแล';
+                      } else if (text === 'super_admin') {
+                        color = 'red';
+                        label = 'ผู้ดูแลระบบ';
+                      }
+                  
+                      // Return the Tag component
+                      return <Tag color={color}>{label}</Tag>;
+                    },
+                    defaultSortOrder: "descend",
+                    onFilter: (value, record) => record.role === value,
+                    filterDropdown: ({
+                      setSelectedKeys,
+                      selectedKeys,
+                      confirm,
+                      clearFilters,
+                    }) => (
+                      <div style={{ padding: 8 }} className="flex flex-col">
+                        {Array.from(
+                          new Set((users || []).map((user) => user.role))
+                        ).map((role) => (
+                          <Checkbox
+                            key={role}
+                            value={role}
+                            checked={selectedKeys.includes(role)}
+                            onChange={(e) => {
+                              setSelectedKeys(e.target.checked ? [role] : []);
+                            }}
+                          >
+                            {role == 'employee' ? "พนักงาน" : role=='admin'? "ผู้ดูแล":"ผู้ดูแลระบบ"}
+                          </Checkbox>
+                        ))}
+                        <div className="flex justify-between mt-2 pt-1">
+                          <Button
+                            onClick={() => clearFilters()}
+                            size="small"
+                            style={{ marginRight: 8 }}
+                          >
+                            รีเซ็ต
+                          </Button>
+                          <Button
+                            type="primary"
+                            onClick={() => confirm()}
+                            size="small"
+                          >
+                            ตกลง
+                          </Button>
+                        </div>
+                      </div>
+                    ),
+                  },
+
+                  {
                     title: "แผนก",
                     dataIndex: "department",
                     width: 200,
                     responsive: ["sm"],
                     filters: Array.from(
-                      new Set(
-                        (department || [])?.map((department) => department.name)
-                      )
+                      new Set((users || [])?.map((user) => user.department))
                     ).map((department) => ({
                       text: department,
                       value: department,
@@ -388,16 +411,9 @@ export default function EmpList() {
                       confirm,
                       clearFilters,
                     }) => (
-                      <div
-                        style={{ padding: 8 }}
-                        className="flex flex-col gap-2"
-                      >
+                      <div style={{ padding: 8 }} className="flex flex-col">
                         {Array.from(
-                          new Set(
-                            (department || [])?.map(
-                              (department) => department.name
-                            )
-                          )
+                          new Set((users || [])?.map((user) => user.department))
                         ).map((department) => (
                           <Checkbox
                             key={department}
@@ -444,6 +460,22 @@ export default function EmpList() {
                       dayjs(a.startDate).isBefore(dayjs(b.startDate)) ? -1 : 1, // การจัดเรียงโดยใช้ dayjs
                     render: (startDate) => {
                       return dayjs(startDate).format("DD/MM/YYYY"); // แสดงวันที่ในรูปแบบ วัน/เดือน/ปี
+                    },
+                  },
+                  {
+                    title: "สร้างโดย",
+                    dataIndex: "createdBy",
+                    sorter: (a, b) => a.createdBy.localeCompare(b.createdBy),
+                    render: (text, record) => {
+                      return `${record.createdBy}`;
+                    },
+                  },
+                  {
+                    title: "ยืนยันโดย",
+                    dataIndex: "confirmedBy",
+                    sorter: (a, b) => a.confirmedBy.localeCompare(b.confirmedBy),
+                    render: (text, record) => {
+                      return `${record.confirmedBy}`;
                     },
                   },
                   {
@@ -534,10 +566,6 @@ export default function EmpList() {
         onClose={closeModal}
         data={selectedUser}
       />
-
-      {/* <DepartmentModal
-       visible={departmentModal}
-       onClose={departmentClose}/> */}
     </>
   );
 }

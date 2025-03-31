@@ -22,9 +22,8 @@ export const getUserRegistrations = async (req: Request, res: Response) => {
     }
 
     const { role } = sessionData;
-    let userId = sessionData.id; // Default to session user if role is 'employee'
+    let userId = sessionData.id;
 
-    // If the role is 'admin', check if the user provided userID in the body
     if (role === "admin") {
       const { userID } = req.body;
       if (!userID || !isValidObjectId(userID)) {
@@ -76,6 +75,7 @@ export const getUserRegistrations = async (req: Request, res: Response) => {
         registrationDate: registration.date,
         status: registration.status,
         timeSlot: registration.timeSlot,
+        expiryDate: registration.expiryDate,
       };
     });
 

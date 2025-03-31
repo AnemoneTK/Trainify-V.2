@@ -74,6 +74,7 @@ export const getCourseRegistrations = async (req: Request, res: Response) => {
             timeSlotKey,
             users: [decryptedUser],
             courseTitle: course.title,
+            status: course.status,
             // คุณอาจเพิ่ม field อื่น ๆ ที่ต้องการได้ที่นี่
           });
         }

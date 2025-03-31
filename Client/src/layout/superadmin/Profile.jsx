@@ -9,6 +9,17 @@ export default function Profile() {
   const { userData } = useUser();
 
   const dropdownItems = [
+    // {
+    //   label: <a href="https://www.antgroup.com">Profile</a>,
+    //   key: "0",
+    // },
+    // {
+    //   label: <a href="https://www.aliyun.com">Settings</a>,
+    //   key: "1",
+    // },
+    // {
+    //   type: "divider",
+    // },
     {
       label: (
         <Button
@@ -50,7 +61,7 @@ export default function Profile() {
           <Space className="text-primary">
             <RiAccountCircleFill className="text-4xl " />
             <div className=" hidden md:flex md:flex-row  gap-2">
-              <div>{userData?.name}</div>
+              <div>{userData?.fullName}</div>
               <DownOutlined />
             </div>
           </Space>

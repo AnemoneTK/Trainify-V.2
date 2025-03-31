@@ -111,8 +111,9 @@ export default function UserModal({ visible, onClose, data }) {
       if (result.isConfirmed) {
         try {
           const response = await callApi({
-            path: `/api/users/delete/${data?.userID}`,
-            method: "delete",
+            path: `/api/users/delete_user`,
+            method: "post",
+            value: { userID: data?.userID },
           });
 
           if (response.statusCode === 200) {

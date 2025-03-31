@@ -71,7 +71,10 @@ export const getUsers = async (req: Request, res: Response) => {
       let usersData;
       const { userID } = req.body;
       if (!userID || userID === "") {
-        const users = await User.find().populate("department", "name");
+        const users = await User.find({ status: { $ne: "deleted" } }).populate(
+          "department",
+          "name"
+        );
         usersData = prepareUserData(users);
       } else {
         const users = await User.find({ _id: userID }).populate(
