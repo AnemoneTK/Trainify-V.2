@@ -34,5 +34,6 @@ router.get("/available_courses", getAvailableCourses);
 router.post("/tag/create", createTag);
 router.get("/tag/gets", getTags);
 router.post("/tag/update", updateTag);
+router.delete("/tag/delete", deleteTag);
 
 export default router;
