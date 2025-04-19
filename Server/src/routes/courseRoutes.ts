@@ -12,7 +12,6 @@ import {
   createTag,
   getTags,
   updateTag,
-  // deleteTag,
 } from "../controller/course/tagController";
 import { getUserRegistrations } from "../controller/course/userCourse";
 
@@ -34,6 +33,5 @@ router.get("/available_courses", getAvailableCourses);
 router.post("/tag/create", createTag);
 router.get("/tag/gets", getTags);
 router.post("/tag/update", updateTag);
-// router.delete("/tag/delete", deleteTag);
 
 export default router;
