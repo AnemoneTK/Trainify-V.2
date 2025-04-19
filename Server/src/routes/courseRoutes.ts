@@ -18,7 +18,7 @@ import { getUserRegistrations } from "../controller/course/userCourse";
 const router = express.Router();
 
 router.post("/create", createCourse);
-router.post("/upload_banner", uploadBanner);
+router.post("/upload_banner", ...uploadBanner);
 router.post("/delete_banner", deleteBanner);
 router.post("/get_course", getCourse);
 router.get("/get_course_end", getEndedCourses);
