@@ -16,8 +16,9 @@ const sendExpiryReminderEmail = async (
   const transporter = nodemailer.createTransport({
     service: "gmail",
     host: "smtp.gmail.com",
-    port: 587,
-    secure: false,
+    port: 587, // Use TLS port
+    secure: false, // Use STARTTLS
+    requireTLS: true,
     auth: {
       user: TRAINIFY_EMAIL,
       pass: Trainify_Password,
