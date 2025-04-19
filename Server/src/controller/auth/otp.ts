@@ -207,12 +207,20 @@ export const verifyOtp = async (req: Request, res: Response) => {
 
 // ฟังก์ชันส่งอีเมล OTP
 const sendOtpEmail = async (email: string, otp: string, otpREF: string) => {
+  console.log("Email config:", {
+    emailExists: !!process.env.TRAINIFY_EMAIL,
+    emailValue: process.env.TRAINIFY_EMAIL
+      ? process.env.TRAINIFY_EMAIL.substring(0, 3) +
+        "..." +
+        process.env.TRAINIFY_EMAIL.split("@")[1]
+      : null,
+    passwordExists: !!process.env.TRAINIFY_EMAIL_PASSWORD,
+    passwordLength: process.env.TRAINIFY_EMAIL_PASSWORD
+      ? process.env.TRAINIFY_EMAIL_PASSWORD.length
+      : 0,
+  });
   const transporter = nodemailer.createTransport({
     service: "gmail",
-    host: "smtp.gmail.com",
-    port: 587, // Use TLS port
-    secure: false, // Use STARTTLS
-    requireTLS: true,
     auth: {
       user: process.env.TRAINIFY_EMAIL,
       pass: process.env.TRAINIFY_EMAIL_PASSWORD,
