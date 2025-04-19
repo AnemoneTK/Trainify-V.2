@@ -1,0 +1,27 @@
+version: "3.8"
+services:
+  data-import:
+    image: mongo:latest
+    container_name: trainify-data-import
+    depends_on:
+      - mongodb
+    volumes:
+      - ./import-data:/import-data
+      - ./import-data.sh:/import-data.sh
+    command: >
+      bash -c "chmod +x /import-data.sh && sleep 10 && /import-data.sh"
+    environment:
+      - MONGO_URI=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongodb:27017/${MONGO_INITDB_DATABASE}?authSource=admin
+      - DATA_DIR=/import-data
+      - SUPER_ADMIN_EMAIL=${SUPER_ADMIN_EMAIL}
+      - SUPER_ADMIN_PASSWORD=${SUPER_ADMIN_PASSWORD}
+      - SUPER_ADMIN_FIRST_NAME=${SUPER_ADMIN_FIRST_NAME}
+      - SUPER_ADMIN_LAST_NAME=${SUPER_ADMIN_LAST_NAME}
+      - SUPER_ADMIN_PHONE=${SUPER_ADMIN_PHONE}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      - ENCRYPTION_IV=${ENCRYPTION_IV}
+    networks:
+      - trainify-network
+networks:
+  trainify-network:
+    external: true
