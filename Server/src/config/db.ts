@@ -6,6 +6,7 @@ import { initSuperAdmin } from "../utils/initSuperAdmin";
 
 const connectDB = async () => {
   try {
+    console.log(`Connecting to MongoDB at: ${process.env.DATABASE_URL}`);
     const conn = await mongoose.connect(process.env.DATABASE_URL as string);
     console.log(`MongoDB Connected: ${conn.connection.host}`);
     // await initSuperAdmin();
