@@ -30,7 +30,7 @@ app.use(formatResponse);
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
 app.use(errorHandler);
-const key = process.env.Secret_Key as string;
+const key = process.env.SECRET_KEY as string;
 app.use(
   session({
     secret: key,
