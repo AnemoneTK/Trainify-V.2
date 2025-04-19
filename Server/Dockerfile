@@ -8,9 +8,8 @@ COPY package*.json ./
 RUN yarn install
 
 # ติดตั้ง nodemon และ ts-node สำหรับโหมดพัฒนา
-# RUN yarn add -D ts-node nodemon
+RUN yarn add -D ts-node nodemon
 
-RUN npx tsc --noEmit
 
 # คัดลอกโค้ดทั้งหมดไปยังคอนเทนเนอร์
 COPY . .
