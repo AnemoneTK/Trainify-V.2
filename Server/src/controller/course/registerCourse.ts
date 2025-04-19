@@ -172,8 +172,8 @@ const sendRegistrationEmail = async (
   place: string,
   userName: string
 ) => {
-  const Trainify_Email = process.env.Trainify_Email;
-  const Trainify_Password = process.env.Trainify_Email_Password;
+  const TRAINIFY_EMAIL = process.env.TRAINIFY_EMAIL;
+  const Trainify_Password = process.env.TRAINIFY_EMAIL_PASSWORD;
 
   const transporter = nodemailer.createTransport({
     service: "gmail",
@@ -181,7 +181,7 @@ const sendRegistrationEmail = async (
     port: 587,
     secure: false,
     auth: {
-      user: Trainify_Email,
+      user: TRAINIFY_EMAIL,
       pass: Trainify_Password,
     },
   });

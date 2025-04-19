@@ -210,8 +210,8 @@ const sendOtpEmail = async (email: string, otp: string, otpREF: string) => {
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-      user: process.env.Trainify_Email,
-      pass: process.env.Trainify_Email_Password,
+      user: process.env.TRAINIFY_EMAIL,
+      pass: process.env.TRAINIFY_EMAIL_PASSWORD,
     },
   });
 

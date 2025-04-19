@@ -120,8 +120,8 @@ const sendResultEmail = async (
       port: 587,
       secure: false,
       auth: {
-        user: process.env.Trainify_Email,
-        pass: process.env.Trainify_Email_Password,
+        user: process.env.TRAINIFY_EMAIL,
+        pass: process.env.TRAINIFY_EMAIL_PASSWORD,
       },
     });
 

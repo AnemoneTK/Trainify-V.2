@@ -12,15 +12,15 @@ pipeline {
         DATABASE_URL = credentials('DATABASE_URL')
         
         // Application Credentials
-        Secret_Key = credentials('Secret_Key')
+        SECRET_KEY = credentials('SECRET_KEY')
         TOKEN_EXPIRES_IN = '12h'
         PORT = '3000'
         ENCRYPTION_KEY = credentials('ENCRYPTION_KEY')
         ENCRYPTION_IV = credentials('ENCRYPTION_IV')
         
         // Email Configuration
-        Trainify_Email = credentials('Trainify_Email')
-        Trainify_Email_Password = credentials('Trainify_Email_Password')
+        TRAINIFY_EMAIL = credentials('TRAINIFY_EMAIL')
+        TRAINIFY_EMAIL_PASSWORD = credentials('TRAINIFY_EMAIL_PASSWORD')
         
         // Super Admin Configuration
         SUPER_ADMIN_EMAIL = credentials('SUPER_ADMIN_EMAIL')
@@ -60,7 +60,7 @@ pipeline {
                         echo "# Application Configuration" >> .env
                         echo "NODE_ENV=production" >> .env
                         echo "PORT=${PORT}" >> .env
-                        echo "SECRET_KEY=${Secret_Key}" >> .env
+                        echo "SECRET_KEY=${SECRET_KEY}" >> .env
                         echo "TOKEN_EXPIRES_IN=${TOKEN_EXPIRES_IN}" >> .env
                         echo "ENCRYPTION_KEY=${ENCRYPTION_KEY}" >> .env
                         echo "ENCRYPTION_IV=${ENCRYPTION_IV}" >> .env
@@ -68,8 +68,8 @@ pipeline {
                         echo "# Email Configuration" >> .env
                         echo "SMTP_HOST=smtp.gmail.com" >> .env
                         echo "SMTP_PORT=587" >> .env
-                        echo "SMTP_USER=${Trainify_Email}" >> .env
-                        echo "SMTP_PASS=${Trainify_Email_Password}" >> .env
+                        echo "SMTP_USER=${TRAINIFY_EMAIL}" >> .env
+                        echo "SMTP_PASS=${TRAINIFY_EMAIL_PASSWORD}" >> .env
                         
                         echo "# Super Admin Configuration" >> .env
                         echo "SUPER_ADMIN_EMAIL=${SUPER_ADMIN_EMAIL}" >> .env
@@ -90,6 +90,59 @@ pipeline {
                     // สร้างไฟล์ .env เฉพาะสำหรับ Client
                     sh '''
                         echo "VITE_API_URL=http://localhost:3000/api" > Client/.env
+                    '''
+
+                    sh '''
+                        echo "🔍 Jenkins Environment Variable Diagnostics 🔍"
+                        echo "----------------------------------------"
+                        
+                        # MongoDB Configuration
+                        echo "MongoDB Username: ${MONGO_INITDB_ROOT_USERNAME:0:3}***"
+                        echo "MongoDB Database: ${MONGO_INITDB_DATABASE}"
+                        echo "Database URL: ${DATABASE_URL:0:10}***"
+                        
+                        # Application Configuration
+                        echo "Node Environment: ${NODE_ENV}"
+                        echo "Port: ${PORT}"
+                        echo "Token Expires In: ${TOKEN_EXPIRES_IN}"
+                        
+                        # Encryption Configuration
+                        echo "Encryption Key: ${ENCRYPTION_KEY:0:3}***"
+                        echo "Encryption IV: ${ENCRYPTION_IV:0:3}***"
+                        
+                        # Email Configuration
+                        echo "SMTP Host: ${SMTP_HOST}"
+                        echo "SMTP Port: ${SMTP_PORT}"
+                        echo "SMTP User: ${TRAINIFY_EMAIL:0:5}***"
+                        
+                        # Super Admin Configuration
+                        echo "Super Admin Email: ${SUPER_ADMIN_EMAIL:0:5}***"
+                        echo "Super Admin First Name: ${SUPER_ADMIN_FIRST_NAME}"
+                        echo "Super Admin Last Name: ${SUPER_ADMIN_LAST_NAME}"
+                        echo "Super Admin Phone: ${SUPER_ADMIN_PHONE:0:4}***"
+                        
+                        # Client Configuration
+                        echo "Vite API URL: ${VITE_API_URL}"
+                        
+                        echo "----------------------------------------"
+                        echo "🔍 Validation Checks 🔍"
+                        
+                        # Basic Validation Checks
+                        if [ -z "${MONGO_INITDB_ROOT_USERNAME}" ]; then
+                            echo "❌ WARNING: MongoDB Username is EMPTY"
+                        fi
+                        
+                        if [ -z "${DATABASE_URL}" ]; then
+                            echo "❌ WARNING: Database URL is EMPTY"
+                        fi
+                        
+                        if [ -z "${SUPER_ADMIN_EMAIL}" ]; then
+                            echo "❌ WARNING: Super Admin Email is EMPTY"
+                        fi
+                        
+                        if [ -z "${TRAINIFY_EMAIL}" ]; then
+                            echo "❌ WARNING: SMTP User Email is EMPTY"
+                        fi
                     '''
                 }
             }
