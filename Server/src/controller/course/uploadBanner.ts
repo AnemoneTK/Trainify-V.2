@@ -1,13 +1,22 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import upload from "../../middlewares/upload"; // Import multer configuration
 import fs from "fs";
 import path from "path";
 import { CourseSchema } from "../../utils/constants";
 const Course = CourseSchema;
 
-export const uploadBanner = [
-  upload.single("banner"),
-  async (req: Request, res: Response) => {
+// แก้ไขเป็นฟังก์ชันเดียวที่จัดการทั้ง middleware และ logic
+export const uploadBanner = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  // เรียกใช้ middleware upload ก่อน
+  upload.single("banner")(req, res, async (err) => {
+    if (err) {
+      return res.error(500, "เกิดข้อผิดพลาดในการอัปโหลดไฟล์", err.message);
+    }
+
     try {
       // ตรวจสอบ session
       const sessionData = (req.session as any)?.userData;
@@ -35,9 +44,10 @@ export const uploadBanner = [
         (error as Error).message
       );
     }
-  },
-];
+  });
+};
 
+// ส่วน deleteBanner ยังคงเหมือนเดิม ไม่ต้องแก้ไข
 export const deleteBanner = async (req: Request, res: Response) => {
   try {
     // ตรวจสอบ session
