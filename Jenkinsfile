@@ -121,7 +121,23 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        // stage('Build') {
+        //     steps {
+        //         script {
+        //             echo "Current directory: ${pwd()}"
+        //             echo "Listing files:"
+        //             sh 'ls -l'
+        //             echo "Building Docker image..."
+        //             sh """
+        //                 export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+        //                 docker-compose -f $DOCKER_COMPOSE_FILE build --no-cache
+        //             """
+        //             echo "Docker image build complete."
+        //         }
+        //     }
+        // }
+
+        stage('Deploy') {
             steps {
                 script {
                     echo "Current directory: ${pwd()}"
@@ -130,19 +146,7 @@ pipeline {
                     echo "Building Docker image..."
                     sh """
                         export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
-                        docker-compose -f $DOCKER_COMPOSE_FILE build --no-cache
-                    """
-                    echo "Docker image build complete."
-                }
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                script {
-                    sh """
-                        export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
-                        docker-compose -f $DOCKER_COMPOSE_FILE up -d
+                        docker-compose -f $DOCKER_COMPOSE_FILE up -d --build
                     """
                 }
             }
