@@ -1,14 +1,55 @@
 services:
-  mongo:
+  mongodb:
     image: mongo:latest
-    container_name: mongodb
     ports:
-      - "27017:27017" # เปิดพอร์ต 27017 ของคอนเทนเนอร์ไปยังพอร์ต 27017 ของโฮสต์
-    env_file:
-      - .env # โหลดตัวแปร environment จากไฟล์ .env.docker
+      - "27017:27017"
+    environment: .env
     volumes:
-      - mongo_data:/data/db # เชื่อมต่อ volume ไปยัง path เก็บข้อมูลของ MongoDB
+      - mongo-data:/data/db
+
+  data-import:
+    image: mongo:latest
+    container_name: trainify-data-import
+    depends_on:
+      - mongodb
+    volumes:
+      - ./import-data:/import-data
+      - ./import-data.sh:/import-data.sh
+    command: >
+      bash -c "chmod +x /import-data.sh && sleep 10 && /import-data.sh"
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/trainify
+      - DATA_DIR=/import-data
+    networks:
+      - trainify-network
+
+  server:
+    build:
+      context: ./server
+    working_dir: /app
+    volumes:
+      - ./server:/app
+    ports:
+      - "3000:3000"
+    command: yarn dev
+    environment: .env
+    depends_on:
+      - mongodb
+
+  client:
+    build:
+      context: ./client
+    working_dir: /app
+    volumes:
+      - ./client:/src
+    ports:
+      - "3100:3000"
+    command: yarn dev
+    depends_on:
+      - server
 
 volumes:
-  mongo_data:
-    driver: local # ใช้ driver local เพื่อเก็บข้อมูลลงบนเครื่องโฮสต์
+  mongo-data:
+networks:
+  trainify-network:
+    external: true

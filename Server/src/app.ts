@@ -27,10 +27,10 @@ app.use(
 
 app.use(helmet());
 app.use(formatResponse);
-dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
 app.use(errorHandler);
-const key = process.env.DATABASE_URL as string;
+const key = process.env.Secret_Key as string;
 app.use(
   session({
     secret: key,
@@ -69,7 +69,6 @@ app.use(
     extensions: ["jpg", "jpeg", "png"],
   })
 );
-dotenv.config();
 
 app.use("/api/users", usersRoutes);
 app.use("/api/course", courseRoutes);

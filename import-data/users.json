@@ -1,0 +1,50 @@
+[
+  {
+    "_id": {
+      "$oid": "672ede5d8080eb8499b9181f"
+    },
+    "email": "f6e956b7be77924868953ad60acec39b46f67a8572a995f8bc49c701c1365ef1",
+    "password": "$2b$10$4jwwv66XEK7w2cfuvNYUHOAwRJYT0CGC8CLEXn4nzxuMXvptQEq8q",
+    "role": "super_admin",
+    "nationalId": "282b8527cb42538af72eebf02aba009a",
+    "firstName": "1bc90a4feeab19e10b23a8a8d0a8f86f",
+    "lastName": "79f7c3d8752142d8a8648ec5ddb78629",
+    "phoneNumber": "23b1edc66dd64b67ea764ff498cdd5e3",
+    "startDate": {
+      "$date": "2024-11-08T00:00:00.000Z"
+    },
+    "department": {
+      "$oid": "67303d28feb812c5563e995f"
+    },
+    "status": "active",
+    "createdBy": {
+      "userId": {
+        "$oid": "672ede5d8080eb8499b9181f"
+      },
+      "name": "Super Admin",
+      "_id": {
+        "$oid": "672ede5d8080eb8499b9181f"
+      }
+    },
+    "confirmedBy": {
+      "userId": {
+        "$oid": "672ede5d8080eb8499b9181f"
+      },
+      "name": "Super Admin",
+      "_id": {
+        "$oid": "672ede5d8080eb8499b9181f"
+      }
+    },
+    "lastOtpSentTime": null,
+    "policyAccepted": {
+      "$date": "2024-11-09T04:12:59.030Z"
+    },
+    "createdAt": {
+      "$date": "2024-11-09T04:00:29.373Z"
+    },
+    "updatedAt": {
+      "$date": "2024-11-09T04:00:29.373Z"
+    },
+    "__v": 0
+  }
+]
