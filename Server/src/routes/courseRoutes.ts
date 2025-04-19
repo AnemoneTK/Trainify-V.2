@@ -1,6 +1,10 @@
 import express from "express";
 import { createCourse } from "../controller/course/createCourse";
-import { uploadBanner, deleteBanner } from "../controller/course/uploadBanner";
+import {
+  handleUpload,
+  uploadBannerMiddleware,
+  deleteBanner,
+} from "../controller/course/uploadBanner";
 import { editCourse } from "../controller/course/editCourse";
 import { getCourse, getEndedCourses } from "../controller/course/getCourse";
 import { deleteCourse } from "../controller/course/deleteCourse";
@@ -18,7 +22,7 @@ import { getUserRegistrations } from "../controller/course/userCourse";
 const router = express.Router();
 
 router.post("/create", createCourse);
-router.post("/upload_banner", uploadBanner);
+router.post("/upload_banner", uploadBannerMiddleware, handleUpload);
 router.post("/delete_banner", deleteBanner);
 router.post("/get_course", getCourse);
 router.get("/get_course_end", getEndedCourses);

@@ -1,53 +1,44 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import upload from "../../middlewares/upload"; // Import multer configuration
 import fs from "fs";
 import path from "path";
 import { CourseSchema } from "../../utils/constants";
 const Course = CourseSchema;
 
-// แก้ไขเป็นฟังก์ชันเดียวที่จัดการทั้ง middleware และ logic
-export const uploadBanner = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  // เรียกใช้ middleware upload ก่อน
-  upload.single("banner")(req, res, async (err) => {
-    if (err) {
-      return res.error(500, "เกิดข้อผิดพลาดในการอัปโหลดไฟล์", err.message);
+// ฟังก์ชันสำหรับจัดการการอัปโหลด (โดยไม่รวม middleware)
+export const handleUpload = async (req: Request, res: Response) => {
+  try {
+    // ตรวจสอบ session
+    const sessionData = (req.session as any)?.userData;
+    if (!sessionData) {
+      return res.error(401, "Session หมดอายุ กรุณาเข้าสู่ระบบใหม่");
     }
 
-    try {
-      // ตรวจสอบ session
-      const sessionData = (req.session as any)?.userData;
-      if (!sessionData) {
-        return res.error(401, "Session หมดอายุ กรุณาเข้าสู่ระบบใหม่");
-      }
-
-      // ตรวจสอบสิทธิ์ admin
-      if (sessionData.role !== "admin") {
-        return res.error(403, "คุณไม่มีสิทธิ์อัปโหลดแบนเนอร์");
-      }
-
-      if (!req.file) {
-        return res.error(400, "กรุณาอัปโหลดไฟล์");
-      }
-
-      // สร้าง URL หรือ path ของไฟล์
-      const bannerUrl = `/uploads/banners/${req.file.filename}`;
-
-      return res.success("อัปโหลดไฟล์สำเร็จ", { bannerUrl });
-    } catch (error) {
-      return res.error(
-        500,
-        "เกิดข้อผิดพลาดในการอัปโหลดไฟล์",
-        (error as Error).message
-      );
+    // ตรวจสอบสิทธิ์ admin
+    if (sessionData.role !== "admin") {
+      return res.error(403, "คุณไม่มีสิทธิ์อัปโหลดแบนเนอร์");
     }
-  });
+
+    if (!req.file) {
+      return res.error(400, "กรุณาอัปโหลดไฟล์");
+    }
+
+    // สร้าง URL หรือ path ของไฟล์
+    const bannerUrl = `/uploads/banners/${req.file.filename}`;
+
+    return res.success("อัปโหลดไฟล์สำเร็จ", { bannerUrl });
+  } catch (error) {
+    return res.error(
+      500,
+      "เกิดข้อผิดพลาดในการอัปโหลดไฟล์",
+      (error as Error).message
+    );
+  }
 };
 
-// ส่วน deleteBanner ยังคงเหมือนเดิม ไม่ต้องแก้ไข
+// Export middleware แยกเพื่อใช้ในไฟล์ routes
+export const uploadBannerMiddleware = upload.single("banner");
+
 export const deleteBanner = async (req: Request, res: Response) => {
   try {
     // ตรวจสอบ session

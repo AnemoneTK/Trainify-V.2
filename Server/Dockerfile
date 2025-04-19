@@ -5,6 +5,8 @@ WORKDIR /app
 
 # ติดตั้ง dependencies
 COPY package*.json ./
+RUN rm -rf node_modules
+RUN rm package-lock.json
 RUN yarn install
 
 # ติดตั้ง nodemon และ ts-node สำหรับโหมดพัฒนา
