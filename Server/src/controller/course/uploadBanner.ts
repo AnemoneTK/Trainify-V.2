@@ -5,7 +5,10 @@ import path from "path";
 import { CourseSchema } from "../../utils/constants";
 const Course = CourseSchema;
 
-// ฟังก์ชันสำหรับจัดการการอัปโหลด (โดยไม่รวม middleware)
+// ใช้ any type สำหรับ middleware เพื่อหลีกเลี่ยง type conflict
+export const uploadBannerMiddleware = upload.single("banner") as any;
+
+// แยก handler function สำหรับการจัดการหลังจาก upload
 export const handleUpload = async (req: Request, res: Response) => {
   try {
     // ตรวจสอบ session
@@ -35,9 +38,6 @@ export const handleUpload = async (req: Request, res: Response) => {
     );
   }
 };
-
-// Export middleware แยกเพื่อใช้ในไฟล์ routes
-export const uploadBannerMiddleware = upload.single("banner");
 
 export const deleteBanner = async (req: Request, res: Response) => {
   try {
