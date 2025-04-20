@@ -88,11 +88,9 @@ const sendStatusChangeNotificationEmail = async (
   const Trainify_Password = process.env.TRAINIFY_EMAIL_PASSWORD;
 
   const transporter = nodemailer.createTransport({
-    service: "gmail",
     host: "smtp.gmail.com",
-    port: 587, // Use TLS port
-    secure: false, // Use STARTTLS
-    requireTLS: true,
+    port: 587,
+    secure: false,
     auth: {
       user: TRAINIFY_EMAIL,
       pass: Trainify_Password,

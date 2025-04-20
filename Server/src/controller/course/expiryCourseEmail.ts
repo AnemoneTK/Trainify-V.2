@@ -14,11 +14,9 @@ const sendExpiryReminderEmail = async (
   const Trainify_Password = process.env.TRAINIFY_EMAIL_PASSWORD;
 
   const transporter = nodemailer.createTransport({
-    service: "gmail",
     host: "smtp.gmail.com",
-    port: 587, // Use TLS port
-    secure: false, // Use STARTTLS
-    requireTLS: true,
+    port: 587,
+    secure: false,
     auth: {
       user: TRAINIFY_EMAIL,
       pass: Trainify_Password,
@@ -31,32 +29,111 @@ const sendExpiryReminderEmail = async (
     day: "numeric",
   });
 
-  let subject = "";
-  let message = "";
+  let subject, headerClass;
 
   if (status === "expiring") {
     subject = `แจ้งเตือน: คอร์ส ${courseTitle} กำลังใกล้หมดอายุ`;
-    message = `
-      <p>สวัสดีคุณ ${userName},</p>
-      <p>คอร์ส <strong>${courseTitle}</strong> ที่คุณลงทะเบียนจะหมดอายุในวันที่ <strong>${formattedExpiryDate}</strong></p>
-      <p>กรุณาตรวจสอบสถานะของหลักสูตร และติดต่อพนักงานผู้ดูแลหากคุณต้องการต่ออายุคอร์สของคุณ.</p>
-      <p>ขอบคุณ,<br>ทีมงาน Trainify</p>
-    `;
+    headerClass = "warning";
   } else if (status === "expired") {
     subject = `แจ้งเตือน: คอร์ส ${courseTitle} หมดอายุแล้ว`;
-    message = `
-      <p>สวัสดีคุณ ${userName},</p>
-      <p>คอร์ส <strong>${courseTitle}</strong> ที่คุณลงทะเบียนหมดอายุแล้วเมื่อวันที่ <strong>${formattedExpiryDate}</strong></p>
-      <p>หากคุณต้องการใช้งานคอร์สนี้ กรุณาติดต่อพนักงานผู้ดูแลเพื่อทำการต่ออายุคอร์สของคุณ.</p>
-      <p>ขอบคุณ,<br>ทีมงาน Trainify</p>
-    `;
+    headerClass = "danger";
   }
 
   const mailOptions = {
     from: "Trainify Project <no-reply@trainify.com>",
     to: email,
     subject: subject,
-    html: message,
+    html: `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+        body {
+          font-family: 'Kanit', Arial, sans-serif;
+          margin: 0;
+          padding: 0;
+          background-color: #f4f4f4;
+        }
+        .email-container {
+          max-width: 600px;
+          margin: 0 auto;
+          background-color: #ffffff;
+          border-radius: 8px;
+          overflow: hidden;
+          border: 1px solid #e0e0e0;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+        .email-header {
+          color: #ffffff;
+          padding: 20px;
+          text-align: center;
+        }
+        .email-header.warning {
+          background-color: #f39c12;
+        }
+        .email-header.danger {
+          background-color: #e74c3c;
+        }
+        .email-content {
+          padding: 30px;
+          color: #333333;
+          line-height: 1.6;
+        }
+        .email-footer {
+          background-color: #f9f9f9;
+          padding: 15px;
+          text-align: center;
+          font-size: 12px;
+          color: #777777;
+          border-top: 1px solid #e0e0e0;
+        }
+        .button {
+          display: inline-block;
+          padding: 12px 24px;
+          text-decoration: none;
+          border-radius: 4px;
+          font-weight: bold;
+          margin: 15px 0;
+          color: #ffffff;
+        }
+        .button.warning {
+          background-color: #f39c12;
+        }
+        .button.danger {
+          background-color: #e74c3c;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="email-container">
+        <div class="email-header ${headerClass}">
+          <h2 style="margin: 0;">${subject}</h2>
+        </div>
+        <div class="email-content">
+          <p>สวัสดีคุณ ${userName},</p>
+          <p>คอร์ส <strong>${courseTitle}</strong> ที่คุณลงทะเบียน${
+      status === "expiring" ? "จะหมดอายุในวันที่" : "หมดอายุแล้วเมื่อวันที่"
+    } <strong>${formattedExpiryDate}</strong></p>
+          <p>${
+            status === "expiring"
+              ? "กรุณาตรวจสอบสถานะของหลักสูตร และติดต่อพนักงานผู้ดูแลหากคุณต้องการต่ออายุคอร์สของคุณ"
+              : "หากคุณต้องการใช้งานคอร์สนี้ กรุณาติดต่อพนักงานผู้ดูแลเพื่อทำการต่ออายุคอร์สของคุณ"
+          }</p>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="#" class="button ${headerClass}">ต่ออายุคอร์ส</a>
+          </div>
+        </div>
+        <div class="email-footer">
+          <p>© ${new Date().getFullYear()} Trainify. สงวนลิขสิทธิ์.</p>
+          <p>หากมีคำถามหรือต้องการความช่วยเหลือ กรุณาติดต่อทีมสนับสนุน</p>
+        </div>
+      </div>
+    </body>
+    </html>
+    `,
   };
 
   try {

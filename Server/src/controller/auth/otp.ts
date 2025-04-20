@@ -207,18 +207,6 @@ export const verifyOtp = async (req: Request, res: Response) => {
 
 // ฟังก์ชันส่งอีเมล OTP
 const sendOtpEmail = async (email: string, otp: string, otpREF: string) => {
-  console.log("Email config:", {
-    emailExists: !!process.env.TRAINIFY_EMAIL,
-    emailValue: process.env.TRAINIFY_EMAIL
-      ? process.env.TRAINIFY_EMAIL.substring(0, 3) +
-        "..." +
-        process.env.TRAINIFY_EMAIL.split("@")[1]
-      : null,
-    passwordExists: !!process.env.TRAINIFY_EMAIL_PASSWORD,
-    passwordLength: process.env.TRAINIFY_EMAIL_PASSWORD
-      ? process.env.TRAINIFY_EMAIL_PASSWORD.length
-      : 0,
-  });
   const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 587,
@@ -232,13 +220,101 @@ const sendOtpEmail = async (email: string, otp: string, otpREF: string) => {
   const mailOptions = {
     from: "Trainify Project <no-reply@trainify.com>",
     to: email,
-    subject: `Trainify OTP`,
+    subject: "รหัสยืนยัน OTP - Trainify",
     html: `
-      <p>รหัสอ้างอิง: ${otpREF}</p>
-      <p>รหัส OTP: <strong>${otp}</strong></p>
-      <p>กรุณาใช้รหัสนี้ภายใน 2 นาที</p>
-      <p>หากคุณไม่ได้ร้องขอ กรุณาละเลยอีเมลนี้</p>
-      <p>ขอบคุณ, ทีมงาน Trainify</p>
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+        body {
+          font-family: 'Kanit', Arial, sans-serif;
+          margin: 0;
+          padding: 0;
+          background-color: #f4f4f4;
+        }
+        .email-container {
+          max-width: 600px;
+          margin: 0 auto;
+          background-color: #ffffff;
+          border-radius: 8px;
+          overflow: hidden;
+          border: 1px solid #e0e0e0;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+        .email-header {
+          background-color: #3498db;
+          color: #ffffff;
+          padding: 20px;
+          text-align: center;
+        }
+        .email-content {
+          padding: 30px;
+          color: #333333;
+          line-height: 1.6;
+        }
+        .email-footer {
+          background-color: #f9f9f9;
+          padding: 15px;
+          text-align: center;
+          font-size: 12px;
+          color: #777777;
+          border-top: 1px solid #e0e0e0;
+        }
+        .highlight {
+          background-color: #f8f9fa;
+          border-left: 4px solid #3498db;
+          padding: 15px;
+          margin: 20px 0;
+          border-radius: 0 4px 4px 0;
+        }
+        .otp-code {
+          font-size: 24px;
+          font-weight: bold;
+          letter-spacing: 5px;
+          text-align: center;
+          padding: 15px;
+          background-color: #f8f9fa;
+          border-radius: 6px;
+          margin: 15px 0;
+          color: #333;
+        }
+        .ref-code {
+          text-align: center;
+          font-family: monospace;
+          font-size: 16px;
+          background-color: #f8f9fa;
+          padding: 10px;
+          border-radius: 4px;
+          margin-bottom: 15px;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="email-container">
+        <div class="email-header">
+          <h2 style="margin: 0;">Trainify - ยืนยันตัวตน</h2>
+        </div>
+        <div class="email-content">
+          <p>สวัสดีครับ,</p>
+          <p>กรุณาใช้รหัส OTP นี้เพื่อยืนยันตัวตนในระบบ Trainify:</p>
+          
+          <div class="highlight">
+            <div class="ref-code">รหัสอ้างอิง: <strong>${otpREF}</strong></div>
+            <div class="otp-code">${otp}</div>
+            <p style="text-align: center; margin: 15px 0 0 0;">รหัสนี้จะหมดอายุภายใน <strong>2 นาที</strong></p>
+          </div>
+          
+          <p>หากคุณไม่ได้ร้องขอรหัสนี้ กรุณาละเลยอีเมลฉบับนี้</p>
+        </div>
+        <div class="email-footer">
+          <p>© ${new Date().getFullYear()} Trainify. สงวนลิขสิทธิ์.</p>
+          <p>หากมีคำถามหรือต้องการความช่วยเหลือ กรุณาติดต่อทีมสนับสนุน</p>
+        </div>
+      </div>
+    </body>
+    </html>
     `,
   };
 
