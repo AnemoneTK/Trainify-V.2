@@ -23,11 +23,22 @@ pipeline {
         TRAINIFY_EMAIL_PASSWORD = credentials('TRAINIFY_EMAIL_PASSWORD')
         
         // Super Admin Configuration
-        SUPER_ADMIN_EMAIL = credentials('SUPER_ADMIN_EMAIL')
-        SUPER_ADMIN_PASSWORD = credentials('SUPER_ADMIN_PASSWORD')
-        SUPER_ADMIN_FIRST_NAME = 'Super'
-        SUPER_ADMIN_LAST_NAME = 'Admin'
-        SUPER_ADMIN_PHONE = credentials('SUPER_ADMIN_PHONE')
+        TEST_SUPER_ADMIN_EMAIL = credentials('SUPER_ADMIN_EMAIL')
+        TEST_SUPER_ADMIN_PASSWORD = credentials('SUPER_ADMIN_PASSWORD')
+        TEST_SUPER_ADMIN_FIRST_NAME = 'Super'
+        TEST_SUPER_ADMIN_LAST_NAME = 'Admin'
+        TEST_SUPER_ADMIN_PHONE = credentials('SUPER_ADMIN_PHONE')
+
+        // Admin Credentials
+        TEST_ADMIN_EMAIL = credentials('TEST_ADMIN_EMAIL')
+        TEST_ADMIN_PASSWORD = credentials('TEST_ADMIN_PASSWORD')
+        TEST_ADMIN_FIRST_NAME = credentials('TEST_ADMIN_FIRST_NAME')
+        TEST_ADMIN_LAST_NAME = credentials('TEST_ADMIN_LAST_NAME')
+        TEST_ADMIN_PHONE = credentials('TEST_ADMIN_PHONE')
+
+        ROBOT_TESTS_DIR = "robot/script"
+        ROBOT_RESULTS_DIR = "robot/result"
+
     }
 
     stages {
@@ -204,27 +215,34 @@ pipeline {
                 }
             }
         }
-        // stage('Robot Test') {
-        //     steps {
-        //         script {
-        //             echo "Running Robot Framework tests..."
-        //             // รัน Robot Framework โดยตรงบนเครื่อง Jenkins
-        //             sh """
-        //                 /opt/anaconda3/bin/robot --outputdir ${pwd()}/Robot/result ${pwd()}/Robot/script
-        //             """
-        //         }
-        //     }
-        //     post {
-        //         always {
-        //             // จัดเก็บผลการทดสอบเป็น artifacts
-        //             archiveArtifacts artifacts: "${ROBOT_RESULTS_DIR}/**/*", fingerprint: true
+        stage('Robot Test') {
+            steps {
+                script {
+                    sh """
+                        robot --variable VALID_EMP_EMAIL:${TEST_VALID_EMP_EMAIL} \
+                        --variable VALID_ADMIN_EMAIL:${TEST_VALID_ADMIN_EMAIL} \
+                        --variable VALID_SUPER_ADMIN_EMAIL:${TEST_VALID_SUPER_ADMIN_EMAIL} \
+                        --variable VALID_PASSWORD:${TEST_VALID_PASSWORD} \
+                        trainify_tests.robot
+                    """
+                    echo "Running Robot Framework tests..."
+                    // รัน Robot Framework โดยตรงบนเครื่อง Jenkins
+                    sh """
+                        /opt/anaconda3/bin/robot --outputdir ${pwd()}/Robot/result ${pwd()}/Robot/script
+                    """
+                }
+            }
+            post {
+                always {
+                    // จัดเก็บผลการทดสอบเป็น artifacts
+                    archiveArtifacts artifacts: "${ROBOT_RESULTS_DIR}/**/*", fingerprint: true
                     
-        //             robot outputPath: "${ROBOT_RESULTS_DIR}", 
-        //                 passThreshold: 80.0, 
-        //                 unstableThreshold: 60.0
-        //         }
-        //     }
-        // }
+                    robot outputPath: "${ROBOT_RESULTS_DIR}", 
+                        passThreshold: 80.0, 
+                        unstableThreshold: 60.0
+                }
+            }
+        }
     }
 
     post {

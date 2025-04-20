@@ -36,7 +36,7 @@ export default function Login() {
       background: "bg-sa-secondary",
       button: "bg-sa-primary hover:bg-sa-accent",
       text: "text-sa-primary",
-      title: "ผู้ดูแลระดับสูง",
+      title: "ผู้ดูแลระบบ",
     },
   };
 

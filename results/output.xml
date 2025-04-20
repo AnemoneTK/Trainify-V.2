@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generator="Robot 7.2.2 (Python 3.10.12 on darwin)" generated="2025-04-21T03:08:46.056452" rpa="false" schemaversion="5">
+<suite id="s1" name="Trainify-V.2" source="/Users/tk/Desktop/Trainify-V.2">
+<suite id="s1-s1" name="Robot" source="/Users/tk/Desktop/Trainify-V.2/robot">
+<suite id="s1-s1-s1" name="Script" source="/Users/tk/Desktop/Trainify-V.2/robot/script">
+<suite id="s1-s1-s1-s1" name="Trainify Test" source="/Users/tk/Desktop/Trainify-V.2/robot/script/trainify_test.robot">
+<kw name="Open Browser And Maximize" owner="keywords" type="SETUP">
+<kw name="Open Browser" owner="SeleniumLibrary">
+<msg time="2025-04-21T03:08:46.193945" level="INFO">Opening browser 'Chrome' to base url 'http://localhost:5173'.</msg>
+<arg>${BASE_URL}</arg>
+<arg>${BROWSER}</arg>
+<doc>Opens a new browser instance to the optional ``url``.</doc>
+<status status="PASS" start="2025-04-21T03:08:46.193726" elapsed="2.714533"/>
+</kw>
+<kw name="Maximize Browser Window" owner="SeleniumLibrary">
+<doc>Maximizes current browser window.</doc>
+<status status="PASS" start="2025-04-21T03:08:48.908794" elapsed="0.370485"/>
+</kw>
+<kw name="Set Selenium Implicit Wait" owner="SeleniumLibrary">
+<arg>${WAIT_TIMEOUT}</arg>
+<doc>Sets the implicit wait value used by Selenium.</doc>
+<status status="PASS" start="2025-04-21T03:08:49.279742" elapsed="0.001289"/>
+</kw>
+<status status="PASS" start="2025-04-21T03:08:46.193149" elapsed="3.088027"/>
+</kw>
+<test id="s1-s1-s1-s1-t1" name="TC-05 Super Admin Login Success" line="10">
+<kw name="Initialize Test Case" owner="keywords">
+<kw name="Set Variable" owner="BuiltIn">
+<msg time="2025-04-21T03:08:49.284703" level="INFO">${folder_path} = robot/result/TC-05</msg>
+<var>${folder_path}</var>
+<arg>${OUTPUTDIR}/${test_id}</arg>
+<doc>Returns the given values which can then be assigned to a variables.</doc>
+<status status="PASS" start="2025-04-21T03:08:49.284297" elapsed="0.000537"/>
+</kw>
+<kw name="Create Directory" owner="OperatingSystem">
+<msg time="2025-04-21T03:08:49.285607" level="INFO" html="true">Created directory '&lt;a href="file:///Users/tk/Desktop/Trainify-V.2/robot/result/TC-05"&gt;/Users/tk/Desktop/Trainify-V.2/robot/result/TC-05&lt;/a&gt;'.</msg>
+<arg>${folder_path}</arg>
+<doc>Creates the specified directory.</doc>
+<status status="PASS" start="2025-04-21T03:08:49.284990" elapsed="0.000736"/>
+</kw>
+<kw name="Set Test Variable" owner="BuiltIn">
+<msg time="2025-04-21T03:08:49.286148" level="INFO">${TEST_ID} = TC-05</msg>
+<arg>${TEST_ID}</arg>
+<arg>${test_id}</arg>
+<doc>Makes a variable available everywhere within the scope of the current test.</doc>
+<status status="PASS" start="2025-04-21T03:08:49.285902" elapsed="0.000333"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<msg time="2025-04-21T03:08:49.286610" level="INFO">เริ่มทำการทดสอบ: TC-05 Super Admin Login Success (TC-05)</msg>
+<arg>เริ่มทำการทดสอบ: ${TEST NAME} (${test_id})</arg>
+<arg>console=True</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2025-04-21T03:08:49.286361" elapsed="0.000420"/>
+</kw>
+<kw name="Wait To Screenshot" owner="keywords">
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2025-04-21T03:08:49.287688" level="INFO">Slept 0 seconds.</msg>
+<arg>${wait_time}s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2025-04-21T03:08:49.287427" elapsed="0.000452"/>
+</kw>
+<kw name="Set Variable" owner="BuiltIn">
+<msg time="2025-04-21T03:08:49.288295" level="INFO">${folder_path} = ../robot/result/screenshot/TC-05 Super Admin Login Success</msg>
+<var>${folder_path}</var>
+<arg>../robot/result/screenshot/${TEST NAME}</arg>
+<doc>Returns the given values which can then be assigned to a variables.</doc>
+<status status="PASS" start="2025-04-21T03:08:49.288052" elapsed="0.000313"/>
+</kw>
+<kw name="Create Directory" owner="OperatingSystem">
+<msg time="2025-04-21T03:08:49.289015" level="INFO" html="true">Created directory '&lt;a href="file:///Users/tk/Desktop/robot/result/screenshot/TC-05 Super Admin Login Success"&gt;/Users/tk/Desktop/robot/result/screenshot/TC-05 Super Admin Login Success&lt;/a&gt;'.</msg>
+<arg>${folder_path}</arg>
+<doc>Creates the specified directory.</doc>
+<status status="PASS" start="2025-04-21T03:08:49.288482" elapsed="0.000639"/>
+</kw>
+<kw name="Get Time" owner="BuiltIn">
+<msg time="2025-04-21T03:08:49.289463" level="INFO">${timestamp} = 1745179729</msg>
+<var>${timestamp}</var>
+<arg>epoch</arg>
+<doc>Returns the given time in the requested format.</doc>
+<status status="PASS" start="2025-04-21T03:08:49.289266" elapsed="0.000267"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2025-04-21T03:08:49.351986" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="../robot/result/screenshot/TC-05%20Super%20Admin%20Login%20Success/start_test_1745179729.png"&gt;&lt;img src="../robot/result/screenshot/TC-05%20Super%20Admin%20Login%20Success/start_test_1745179729.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>${folder_path}/${step_name}_${timestamp}.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2025-04-21T03:08:49.289665" elapsed="0.062513"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<msg time="2025-04-21T03:08:49.352654" level="INFO">จับภาพหน้าจอ start_test สำหรับ TC-05 Super Admin Login Success เรียบร้อย</msg>
+<arg>จับภาพหน้าจอ ${step_name} สำหรับ ${TEST NAME} เรียบร้อย</arg>
+<arg>console=True</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2025-04-21T03:08:49.352375" elapsed="0.000474"/>
+</kw>
+<arg>start_test</arg>
+<arg>0</arg>
+<status status="PASS" start="2025-04-21T03:08:49.286943" elapsed="0.066017"/>
+</kw>
+<arg>TC-05</arg>
+<status status="PASS" start="2025-04-21T03:08:49.282793" elapsed="0.070248"/>
+</kw>
+<kw name="Wait Until Page Contains Element" owner="SeleniumLibrary">
+<arg>xpath=//*[@id="root"]/div/div/div[1]/h1[contains(text(), 'เลือกบทบาทของคุณ')]</arg>
+<arg>${1}</arg>
+<doc>Waits until the element ``locator`` appears on the current page.</doc>
+<status status="PASS" start="2025-04-21T03:08:49.353305" elapsed="0.008401"/>
+</kw>
+<kw name="Page Should Contain Element" owner="SeleniumLibrary">
+<msg time="2025-04-21T03:08:49.366898" level="INFO">Current page contains element 'xpath=//*[@id="root"]/div/div/div[2]/div[3]/span[contains(text(), 'ผู้ดูแลระบบ')]'.</msg>
+<arg>xpath=//*[@id="root"]/div/div/div[2]/div[3]/span[contains(text(), 'ผู้ดูแลระบบ')]</arg>
+<doc>Verifies that element ``locator`` is found on the current page.</doc>
+<status status="PASS" start="2025-04-21T03:08:49.361929" elapsed="0.005098"/>
+</kw>
+<kw name="Capture Step" owner="keywords">
+<kw name="Wait To Screenshot" owner="keywords">
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2025-04-21T03:08:50.370911" level="INFO">Slept 1 second.</msg>
+<arg>${wait_time}s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2025-04-21T03:08:49.368149" elapsed="1.003764"/>
+</kw>
+<kw name="Set Variable" owner="BuiltIn">
+<msg time="2025-04-21T03:08:50.373958" level="INFO">${folder_path} = ../robot/result/screenshot/TC-05 Super Admin Login Success</msg>
+<var>${folder_path}</var>
+<arg>../robot/result/screenshot/${TEST NAME}</arg>
+<doc>Returns the given values which can then be assigned to a variables.</doc>
+<status status="PASS" start="2025-04-21T03:08:50.372746" elapsed="0.001446"/>
+</kw>
+<kw name="Create Directory" owner="OperatingSystem">
+<msg time="2025-04-21T03:08:50.376763" level="INFO" html="true">Directory '&lt;a href="file:///Users/tk/Desktop/robot/result/screenshot/TC-05 Super Admin Login Success"&gt;/Users/tk/Desktop/robot/result/screenshot/TC-05 Super Admin Login Success&lt;/a&gt;' already exists.</msg>
+<arg>${folder_path}</arg>
+<doc>Creates the specified directory.</doc>
+<status status="PASS" start="2025-04-21T03:08:50.374693" elapsed="0.002435"/>
+</kw>
+<kw name="Get Time" owner="BuiltIn">
+<msg time="2025-04-21T03:08:50.378286" level="INFO">${timestamp} = 1745179730</msg>
+<var>${timestamp}</var>
+<arg>epoch</arg>
+<doc>Returns the given time in the requested format.</doc>
+<status status="PASS" start="2025-04-21T03:08:50.377753" elapsed="0.000667"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2025-04-21T03:08:50.443298" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="../robot/result/screenshot/TC-05%20Super%20Admin%20Login%20Success/Select_Role_1745179730.png"&gt;&lt;img src="../robot/result/screenshot/TC-05%20Super%20Admin%20Login%20Success/Select_Role_1745179730.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>${folder_path}/${step_name}_${timestamp}.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2025-04-21T03:08:50.378640" elapsed="0.064806"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<msg time="2025-04-21T03:08:50.443900" level="INFO">จับภาพหน้าจอ Select_Role สำหรับ TC-05 Super Admin Login Success เรียบร้อย</msg>
+<arg>จับภาพหน้าจอ ${step_name} สำหรับ ${TEST NAME} เรียบร้อย</arg>
+<arg>console=True</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2025-04-21T03:08:50.443606" elapsed="0.000473"/>
+</kw>
+<arg>${step_name}</arg>
+<arg>${wait_time}</arg>
+<status status="PASS" start="2025-04-21T03:08:49.367719" elapsed="1.076493"/>
+</kw>
+<arg>Select_Role</arg>
+<status status="PASS" start="2025-04-21T03:08:49.367269" elapsed="1.077182"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<msg time="2025-04-21T03:08:50.444748" level="INFO">Clicking element 'xpath=//*[@id="root"]/div/div/div[2]/div[3]/span[contains(text(), 'ผู้ดูแลระบบ')]'.</msg>
+<arg>xpath=//*[@id="root"]/div/div/div[2]/div[3]/span[contains(text(), 'ผู้ดูแลระบบ')]</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="PASS" start="2025-04-21T03:08:50.444585" elapsed="0.153362"/>
+</kw>
+<kw name="Page Should Contain Element" owner="SeleniumLibrary">
+<msg time="2025-04-21T03:09:20.816346" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="selenium-screenshot-1.png"&gt;&lt;img src="selenium-screenshot-1.png" width="800px"&gt;&lt;/a&gt;</msg>
+<msg time="2025-04-21T03:09:20.823250" level="FAIL">Page should have contained element 'xpath=//*[@id="root"]/div/div/div[2]/h1/span[contains(text(), 'ผู้ดูแลระบบ')]' but did not.</msg>
+<arg>xpath=//*[@id="root"]/div/div/div[2]/h1/span[contains(text(), 'ผู้ดูแลระบบ')]</arg>
+<doc>Verifies that element ``locator`` is found on the current page.</doc>
+<status status="FAIL" start="2025-04-21T03:08:50.598239" elapsed="30.230319">Page should have contained element 'xpath=//*[@id="root"]/div/div/div[2]/h1/span[contains(text(), 'ผู้ดูแลระบบ')]' but did not.</status>
+</kw>
+<kw name="Capture Step" owner="keywords">
+<arg>Super_Admin_Login_Page</arg>
+<status status="NOT RUN" start="2025-04-21T03:09:20.831677" elapsed="0.000600"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<arg>id=login_email</arg>
+<arg>email.com</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="NOT RUN" start="2025-04-21T03:09:20.832789" elapsed="0.000066"/>
+</kw>
+<kw name="Capture Step" owner="keywords">
+<arg>Input_Wrong_Format_Email</arg>
+<status status="NOT RUN" start="2025-04-21T03:09:20.832982" elapsed="0.000059"/>
+</kw>
+<kw name="Input Password" owner="SeleniumLibrary">
+<arg>id=login_password</arg>
+<arg>${SA_PASS}</arg>
+<doc>Types the given password into the text field identified by ``locator``.</doc>
+<status status="NOT RUN" start="2025-04-21T03:09:20.833245" elapsed="0.000086"/>
+</kw>
+<kw name="Capture Step" owner="keywords">
+<arg>Input_Password</arg>
+<status status="NOT RUN" start="2025-04-21T03:09:20.833465" elapsed="0.000066"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<arg>xpath=//*[@id="login"]/div[3]/div/div/div/div/button[contains(text(), 'เข้าสู่ระบบ')]</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="NOT RUN" start="2025-04-21T03:09:20.833643" elapsed="0.000060"/>
+</kw>
+<kw name="Page Should Contain Element" owner="SeleniumLibrary">
+<arg>xpath=//*[@id="login_email_help"]/div[contains(text(), 'กรุณากรอกอีเมลที่ถูกต้อง!')]</arg>
+<doc>Verifies that element ``locator`` is found on the current page.</doc>
+<status status="NOT RUN" start="2025-04-21T03:09:20.833866" elapsed="0.000077"/>
+</kw>
+<kw name="Capture Step" owner="keywords">
+<arg>After_Submit</arg>
+<status status="NOT RUN" start="2025-04-21T03:09:20.834065" elapsed="0.000060"/>
+</kw>
+<doc>ทดสอบการเข้าสู่ระบบโดยกรอกรูปแบบ Email ผิด</doc>
+<status status="FAIL" start="2025-04-21T03:08:49.281393" elapsed="31.552912">Page should have contained element 'xpath=//*[@id="root"]/div/div/div[2]/h1/span[contains(text(), 'ผู้ดูแลระบบ')]' but did not.</status>
+</test>
+<kw name="Close All Browsers" owner="SeleniumLibrary" type="TEARDOWN">
+<doc>Closes all open browsers and resets the browser cache.</doc>
+<status status="PASS" start="2025-04-21T03:09:20.835131" elapsed="0.098228"/>
+</kw>
+<doc>Robot Framework test suite for Trainify application</doc>
+<status status="FAIL" start="2025-04-21T03:08:46.071920" elapsed="34.861616"/>
+</suite>
+<status status="FAIL" start="2025-04-21T03:08:46.071111" elapsed="34.863913"/>
+</suite>
+<status status="FAIL" start="2025-04-21T03:08:46.070315" elapsed="34.865964"/>
+</suite>
+<status status="FAIL" start="2025-04-21T03:08:46.058881" elapsed="34.877830"/>
+</suite>
+<statistics>
+<total>
+<stat pass="0" fail="1" skip="0">All Tests</stat>
+</total>
+<tag>
+</tag>
+<suite>
+<stat name="Trainify-V.2" id="s1" pass="0" fail="1" skip="0">Trainify-V.2</stat>
+<stat name="Robot" id="s1-s1" pass="0" fail="1" skip="0">Trainify-V.2.Robot</stat>
+<stat name="Script" id="s1-s1-s1" pass="0" fail="1" skip="0">Trainify-V.2.Robot.Script</stat>
+<stat name="Trainify Test" id="s1-s1-s1-s1" pass="0" fail="1" skip="0">Trainify-V.2.Robot.Script.Trainify Test</stat>
+</suite>
+</statistics>
+<errors>
+<msg time="2025-04-21T03:08:46.078184" level="WARN">Error in file '/Users/tk/Desktop/Trainify-V.2/robot/utils/keywords.robot' on line 151: The '[Return]' setting is deprecated. Use the 'RETURN' statement instead.</msg>
+<msg time="2025-04-21T03:08:46.078573" level="WARN">Error in file '/Users/tk/Desktop/Trainify-V.2/robot/utils/keywords.robot' on line 188: The '[Return]' setting is deprecated. Use the 'RETURN' statement instead.</msg>
+<msg time="2025-04-21T03:08:46.079080" level="WARN">Error in file '/Users/tk/Desktop/Trainify-V.2/robot/utils/keywords.robot' on line 254: The '[Return]' setting is deprecated. Use the 'RETURN' statement instead.</msg>
+</errors>
+</robot>
