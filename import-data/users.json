@@ -1,50 +1,31 @@
 [
   {
-    "_id": {
-      "$oid": "672ede5d8080eb8499b9181f"
-    },
-    "email": "f6e956b7be77924868953ad60acec39b46f67a8572a995f8bc49c701c1365ef1",
-    "password": "$2b$10$4jwwv66XEK7w2cfuvNYUHOAwRJYT0CGC8CLEXn4nzxuMXvptQEq8q",
+    "_id": { "$oid": "6804083b4823ade2d1fbcde2" },
+    "email": "bcd0a68b6fe1ebd0d81b42f13f36056c5b2b11bbf5bb75bf0cc34ab54d01d6a1",
+    "password": "$2b$10$9HD0LrTZVRpLPmP7eaLKduJroLPLl3uIRWxBvROE1elEX3N6e7U1.",
     "role": "super_admin",
-    "nationalId": "282b8527cb42538af72eebf02aba009a",
-    "firstName": "1bc90a4feeab19e10b23a8a8d0a8f86f",
-    "lastName": "79f7c3d8752142d8a8648ec5ddb78629",
-    "phoneNumber": "23b1edc66dd64b67ea764ff498cdd5e3",
-    "startDate": {
-      "$date": "2024-11-08T00:00:00.000Z"
-    },
-    "department": {
-      "$oid": "67303d28feb812c5563e995f"
-    },
+    "nationalId": "b65a7af074f88035f6bc3094edf86e74",
+    "titleName": "อื่นๆ",
+    "firstName": "d7a91650187eca58def4e5dec4ad1aa4",
+    "lastName": "f7b65701696e39ce5ed47a4fa7cfe557",
+    "phoneNumber": "2d56bf8e7c63be419fcfad58b1177706",
+    "startDate": { "$date": "2003-02-22T00:00:00.000Z" },
+    "department": { "$oid": "67303d28feb812c5563e995f" },
     "status": "active",
     "createdBy": {
-      "userId": {
-        "$oid": "672ede5d8080eb8499b9181f"
-      },
-      "name": "Super Admin",
-      "_id": {
-        "$oid": "672ede5d8080eb8499b9181f"
-      }
+      "userId": { "$oid": "6804083b4823ade2d1fbcde1" },
+      "name": "System Initialization",
+      "_id": { "$oid": "6804083b4823ade2d1fbcde3" }
     },
     "confirmedBy": {
-      "userId": {
-        "$oid": "672ede5d8080eb8499b9181f"
-      },
-      "name": "Super Admin",
-      "_id": {
-        "$oid": "672ede5d8080eb8499b9181f"
-      }
+      "userId": { "$oid": "6804083b4823ade2d1fbcde1" },
+      "name": "System Initialization",
+      "_id": { "$oid": "6804083b4823ade2d1fbcde4" }
     },
     "lastOtpSentTime": null,
-    "policyAccepted": {
-      "$date": "2024-11-09T04:12:59.030Z"
-    },
-    "createdAt": {
-      "$date": "2024-11-09T04:00:29.373Z"
-    },
-    "updatedAt": {
-      "$date": "2024-11-09T04:00:29.373Z"
-    },
+    "policyAccepted": { "$date": "2025-04-19T20:31:55.343Z" },
+    "createdAt": { "$date": "2025-04-19T20:31:55.347Z" },
+    "updatedAt": { "$date": "2025-04-19T20:31:55.347Z" },
     "__v": 0
   }
 ]

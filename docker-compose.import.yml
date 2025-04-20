@@ -11,7 +11,7 @@ services:
     command: >
       bash -c "chmod +x /import-data.sh && sleep 10 && /import-data.sh"
     environment:
-      - MONGO_URI=mongodb://mongodb:27017/Trainify
+      - MONGO_URI=${DATABASE_URL}
       - DATA_DIR=/import-data
       - SUPER_ADMIN_EMAIL=${SUPER_ADMIN_EMAIL}
       - SUPER_ADMIN_PASSWORD=${SUPER_ADMIN_PASSWORD}
