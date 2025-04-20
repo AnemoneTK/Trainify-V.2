@@ -22,7 +22,7 @@ services:
       - "3000:3000"
     command: yarn dev
     environment:
-      - DATABASE_URL=mongodb://mongodb:27017/Trainify
+      - DATABASE_URL=${DATABASE_URL}
       - PORT=${PORT}
       - SECRET_KEY=${SECRET_KEY}
       - TOKEN_EXPIRES_IN=${TOKEN_EXPIRES_IN}
@@ -32,6 +32,8 @@ services:
       - SMTP_PORT=587
       - SMTP_USER=${TRAINIFY_EMAIL}
       - SMTP_PASS=${TRAINIFY_EMAIL_PASSWORD}
+      - TRAINIFY_EMAIL=${TRAINIFY_EMAIL}
+      - TRAINIFY_EMAIL_PASSWORD=${TRAINIFY_EMAIL_PASSWORD}
     depends_on:
       - mongodb
     restart: unless-stopped
@@ -69,7 +71,7 @@ services:
     command: >
       bash -c "chmod +x /import-data.sh && sleep 10 && /import-data.sh"
     environment:
-      - MONGO_URI=mongodb://mongodb:27017/Trainify
+      - MONGO_URI=${DATABASE_URL}
       - DATA_DIR=/import-data
       - SUPER_ADMIN_EMAIL=${SUPER_ADMIN_EMAIL}
       - SUPER_ADMIN_PASSWORD=${SUPER_ADMIN_PASSWORD}
