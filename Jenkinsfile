@@ -30,7 +30,7 @@ pipeline {
         TEST_SUPER_ADMIN_PHONE = credentials('SUPER_ADMIN_PHONE')
    
         // Admin Credentials
-        TEST_ADMIN_EMAIL = credentials('TEST_AD MIN_EMAIL')
+        TEST_ADMIN_EMAIL = credentials('TEST_ADMIN_EMAIL')
         TEST_ADMIN_PASSWORD = credentials('TEST_ADMIN_PASSWORD')
         TEST_ADMIN_FIRST_NAME = credentials('TEST_ADMIN_FIRST_NAME')
         TEST_ADMIN_LAST_NAME = credentials('TEST_ADMIN_LAST_NAME')
