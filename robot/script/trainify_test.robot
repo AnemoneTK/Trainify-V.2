@@ -89,10 +89,10 @@ TC-07 Wrong OTP
     Capture Step    After_Submit
     Wait Until Page Contains    ยืนยันรหัส OTP   timeout=10s
     Capture Step    OTP_Verify_Page
-    Wait Until Element Is Enabled   xpath=//*[@id="root"]/div/div/div[4]/button     30s
+    Wait Until Element Is Enabled   xpath=//*[@id="root"]/div/div/div[4]/button     20s
     Capture Step    Input_Wrong_OTP
     Click Button    xpath=//*[@id="root"]/div/div/div[4]/button
-    Wait Until Page Contains    OTP ไม่ถูกต้อง    timeout=10s
+    Wait Until Page Contains    OTP ไม่ถูกต้อง    timeout=2s
     Capture Step    After_Submit
     Click Button    xpath=/html/body/div[2]/div/div[6]/button[1][contains(text(), 'ตกลง')]
     Capture Step    Close_Alert
@@ -109,10 +109,10 @@ TC-09 Verify OTP
     Capture Step    After_Submit
     Wait Until Page Contains    ยืนยันรหัส OTP   timeout=10s
     Capture Step    OTP_Verify_Page
-    Wait Until Element Is Enabled   xpath=//*[@id="root"]/div/div/div[4]/button     30s
+    Wait Until Element Is Enabled   xpath=//*[@id="root"]/div/div/div[4]/button     20s
     Capture Step    Input_OTP
     Click Button    xpath=//*[@id="root"]/div/div/div[4]/button
-    Wait Until Page Contains   Trainify : Super Admin    timeout=10s
+    Wait Until Page Contains   Trainify : Super Admin    timeout=2s
     Capture Step    Super_Admin_Dashboard
 
 
