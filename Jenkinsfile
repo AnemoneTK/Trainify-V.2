@@ -202,25 +202,26 @@ pipeline {
         stage('Robot Test') {
             steps {
                 script {
+                    echo "Running Robot Framework tests..."
+                    def workspace = pwd()
+                    
+                    // รวมคำสั่ง robot เป็นคำสั่งเดียว
                     sh """
-                        robot --variable SA_EMAIL:${SUPER_ADMIN_EMAIL} \
+                        /opt/anaconda3/bin/robot \
+                        --outputdir ${workspace}/robot/result \
+                        --variable SA_EMAIL:${SUPER_ADMIN_EMAIL} \
                         --variable SA_PASS:${SUPER_ADMIN_PASSWORD} \
                         --variable ADMIN_EMAIL:${TEST_ADMIN_EMAIL} \
                         --variable ADMIN_PASS:${TEST_ADMIN_PASSWORD} \
                         --variable ADMIN_PHONE:${TEST_ADMIN_PHONE} \
-                        trainify_tests.robot
-                    """
-                    echo "Running Robot Framework tests..."
-                    def workspace = pwd()
-                    // รัน Robot Framework โดยตรงบนเครื่อง Jenkins
-                     sh """
-                         /opt/anaconda3/bin/robot --outputdir ${pwd()}/robot/result ${pwd()}/robot/script
+                        ${workspace}/robot/script/trainify_test.robot
                     """
                 }
             }
             post {
                 always {
                     sh "ls -la ${ROBOT_RESULTS_DIR}"
+                    sh "ls -la ${ROBOT_RESULTS_DIR}/*" 
                     
                     archiveArtifacts artifacts: "${ROBOT_RESULTS_DIR}/**/*", fingerprint: true
                     
