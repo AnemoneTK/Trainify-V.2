@@ -62,7 +62,7 @@ TC-06 Login With Wrong Password
     Capture Step    Close_Alert
 
 TC-03 Login With Super Admin Account
-    [Documentation]    ทดสอบการเข้าสู่ระบบผู้ดูแลระบบ
+    [Documentation]    ทดสอบการเข้าสู่ระบบผู้ดูแลระบบเพื่อเข้าหน้า OTP
     Initialize Test Case    TC-03
     Wait Until Page Contains Element    xpath=//*[@id="root"]/div/div/div[1]/h1[contains(text(), 'เลือกบทบาทของคุณ')]    ${10}
     Page Should Contain Element    xpath=//*[@id="root"]/div/div/div[2]/div[3]/span[contains(text(), 'ผู้ดูแลระบบ')]
@@ -76,8 +76,6 @@ TC-03 Login With Super Admin Account
     Click Button    xpath=//*[@id="login"]/div[3]/div/div/div/div/button[contains(text(), 'เข้าสู่ระบบ')]
     Wait Until Page Contains    ยืนยันรหัส OTP    timeout=10s
     Capture Step    After_Submit
-    Click Button    xpath=/html/body/div[2]/div/div[6]/button[1][contains(text(), 'ตกลง')]
-    Capture Step    Close_Alert
 
 TC-07 Wrong OTP
     [Documentation]    ทดสอบการใส่ OTP ผิด
