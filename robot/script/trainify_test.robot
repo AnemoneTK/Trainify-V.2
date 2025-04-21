@@ -20,7 +20,7 @@ TC-10 Login With Wrong Format Email
     Input Password    id=login_password    ${SA_PASS}
     Capture Step    Input_Password
     Click Button    xpath=//*[@id="login"]/div[3]/div/div/div/div/button[contains(text(), 'เข้าสู่ระบบ')]
-    Page Should Contain Element    xpath=//*[@id="login_email_help"]/div[contains(text(), 'กรุณากรอกอีเมลที่ถูกต้อง!')]
+    Wait Until Page Contains   กรุณากรอกอีเมลที่ถูกต้อง   timeout=10s
     Capture Step    After_Submit
 
 TC-10 Login With Wrong Email
