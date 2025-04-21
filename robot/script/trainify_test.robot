@@ -23,7 +23,7 @@ TC-10 Login With Wrong Format Email
     Wait Until Page Contains   กรุณากรอกอีเมลที่ถูกต้อง   timeout=10s
     Capture Step    After_Submit
 
-TC-10 Login With Wrong Email
+TC-05 Login With Wrong Email
     [Documentation]    ทดสอบการเข้าสู่ระบบโดยกรอกอีเมลผิดหรืออีเมลที่ยังไม่มีในระบบ
     Initialize Test Case    TC-05
     Wait Until Page Contains Element    xpath=//*[@id="root"]/div/div/div[1]/h1[contains(text(), 'เลือกบทบาทของคุณ')]    ${10}
@@ -116,9 +116,9 @@ TC-09 Verify OTP
     Capture Step    Super_Admin_Dashboard
 
 
-TC-07 Create Admin Account
+TC-02 Create Admin Account
     [Documentation]    ทดสอบการสร้างบัญชีผู้ใช้
-    Initialize Test Case    TC-002
+    Initialize Test Case    TC-02
     Wait Until Page Contains Element    xpath=//*[@id="root"]/div/div/div[1]/h1[contains(text(), 'เลือกบทบาทของคุณ')]    ${10}
     Page Should Contain Element    xpath=//*[@id="root"]/div/div/div[2]/div[3]/span[contains(text(), 'ผู้ดูแลระบบ')]
     Click Element    xpath=//*[@id="root"]/div/div/div[2]/div[3]/span[contains(text(), 'ผู้ดูแลระบบ')]
