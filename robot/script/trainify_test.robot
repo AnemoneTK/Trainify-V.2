@@ -74,7 +74,7 @@ TC-03 Login With Super Admin Account
     Input Password    id=login_password    ${SA_PASS}
     Capture Step    Input_Password
     Click Button    xpath=//*[@id="login"]/div[3]/div/div/div/div/button[contains(text(), 'เข้าสู่ระบบ')]
-    Wait Until Page Contains    ยืนยันรหัส OTP    timeout=10s
+    Page Should Contain Element    xpath=//*[@id="root"]/div/div/div[1][contains(text(), 'ยืนยันรหัส OTP')]
     Capture Step    After_Submit
 
 TC-07 Wrong OTP
