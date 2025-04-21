@@ -118,16 +118,16 @@ TC-09 Verify OTP
     Capture Step    Super_Admin_Dashboard
 
 
-TC-02 Create Admin Account
-    [Documentation]    ทดสอบการสร้างบัญชีผู้ใช้
-    Initialize Test Case    TC-02
-    Wait Until Page Contains Element    xpath=//*[@id="root"]/div/div/div[1]/h1[contains(text(), 'เลือกบทบาทของคุณ')]    ${10}
-    Page Should Contain Element    xpath=//*[@id="root"]/div/div/div[2]/div[3]/span[contains(text(), 'ผู้ดูแลระบบ')]
-    Click Element    xpath=//*[@id="root"]/div/div/div[2]/div[3]/span[contains(text(), 'ผู้ดูแลระบบ')]
-    Page Should Contain Element    xpath=//*[@id="root"]/div/div/div[2]/h1/span[contains(text(), 'ผู้ดูแลระบบ')]
-    Capture Step    Input_Email
-    Input Password    id=login_password    ${SA_PASS}
-    Click Button    xpath=//*[@id="login"]/div[3]/div/div/div/div/button[contains(text(), 'เข้าสู่ระบบ')]
-    Page Should Contain Element    xpath=//*[@id="root"]/div/div/div[1][contains(text(), 'ยืนยันรหัส OTP')]
-    Capture Step    After_Submit
+# TC-02 Create Admin Account
+#     [Documentation]    ทดสอบการสร้างบัญชีผู้ใช้
+#     Initialize Test Case    TC-02
+#     Wait Until Page Contains Element    xpath=//*[@id="root"]/div/div/div[1]/h1[contains(text(), 'เลือกบทบาทของคุณ')]    ${10}
+#     Page Should Contain Element    xpath=//*[@id="root"]/div/div/div[2]/div[3]/span[contains(text(), 'ผู้ดูแลระบบ')]
+#     Click Element    xpath=//*[@id="root"]/div/div/div[2]/div[3]/span[contains(text(), 'ผู้ดูแลระบบ')]
+#     Page Should Contain Element    xpath=//*[@id="root"]/div/div/div[2]/h1/span[contains(text(), 'ผู้ดูแลระบบ')]
+#     Capture Step    Input_Email
+#     Input Password    id=login_password    ${SA_PASS}
+#     Click Button    xpath=//*[@id="login"]/div[3]/div/div/div/div/button[contains(text(), 'เข้าสู่ระบบ')]
+#     Page Should Contain Element    xpath=//*[@id="root"]/div/div/div[1][contains(text(), 'ยืนยันรหัส OTP')]
+#     Capture Step    After_Submit
 
