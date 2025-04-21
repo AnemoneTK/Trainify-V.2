@@ -209,8 +209,8 @@ pipeline {
                     sh """
                         /opt/anaconda3/bin/robot \
                         --outputdir ${workspace}/robot/result \
-                        --variable SA_EMAIL:${SUPER_ADMIN_EMAIL} \
-                        --variable SA_PASS:${SUPER_ADMIN_PASSWORD} \
+                        --variable SA_EMAIL:${TEST_SUPER_ADMIN_EMAIL} \
+                        --variable SA_PASS:${TEST_SUPER_ADMIN_PASSWORD} \
                         --variable ADMIN_EMAIL:${TEST_ADMIN_EMAIL} \
                         --variable ADMIN_PASS:${TEST_ADMIN_PASSWORD} \
                         --variable ADMIN_PHONE:${TEST_ADMIN_PHONE} \
