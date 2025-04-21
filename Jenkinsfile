@@ -37,7 +37,7 @@ pipeline {
         TEST_ADMIN_PHONE = credentials('TEST_ADMIN_PHONE')
 
         ROBOT_TESTS_DIR = "robot/script"
-        ROBOT_RESULTS_DIR = "robot/result"
+        ROBOT_RESULTS_DIR = "results"
 
     }
 
