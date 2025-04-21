@@ -214,8 +214,7 @@ pipeline {
                     def workspace = pwd()
                     // รัน Robot Framework โดยตรงบนเครื่อง Jenkins
                      sh """
-                        mkdir -p ${workspace}/${ROBOT_RESULTS_DIR}
-                        /opt/anaconda3/bin/robot --outputdir ${workspace}/${ROBOT_RESULTS_DIR} ${workspace}/${ROBOT_TESTS_DIR}/*.robot
+                         /opt/anaconda3/bin/robot --outputdir ${pwd()}/robot/result ${pwd()}/robot/script
                     """
                 }
             }
