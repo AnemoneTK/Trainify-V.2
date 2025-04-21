@@ -10,7 +10,7 @@ Suite Teardown    Close All Browsers
 TC-10 Login With Wrong Format Email
     [Documentation]    ทดสอบการเข้าสู่ระบบโดยกรอกรูปแบบ Email ผิด
     Initialize Test Case    TC-10
-    Wait Until Page Contains Element    xpath=//*[@id="root"]/div/div/div[1]/h1[contains(text(), 'เลือกบทบาทของคุณ')]    ${1}
+    Wait Until Page Contains Element    xpath=//*[@id="root"]/div/div/div[1]/h1[contains(text(), 'เลือกบทบาทของคุณ')]    ${10}
     Page Should Contain Element    xpath=//*[@id="root"]/div/div/div[2]/div[3]/span[contains(text(), 'ผู้ดูแลระบบ')]
     Capture Step    Select_Role
     Click Element    xpath=//*[@id="root"]/div/div/div[2]/div[3]/span[contains(text(), 'ผู้ดูแลระบบ')]
@@ -26,7 +26,7 @@ TC-10 Login With Wrong Format Email
 TC-10 Login With Wrong Email
     [Documentation]    ทดสอบการเข้าสู่ระบบโดยกรอกอีเมลผิดหรืออีเมลที่ยังไม่มีในระบบ
     Initialize Test Case    TC-05
-    Wait Until Page Contains Element    xpath=//*[@id="root"]/div/div/div[1]/h1[contains(text(), 'เลือกบทบาทของคุณ')]    ${1}
+    Wait Until Page Contains Element    xpath=//*[@id="root"]/div/div/div[1]/h1[contains(text(), 'เลือกบทบาทของคุณ')]    ${10}
     Capture Step    Select_Role
     Click Element    xpath=//*[@id="root"]/div/div/div[2]/div[3]/span[contains(text(), 'ผู้ดูแลระบบ')]
     Wait Until Page Contains    ผู้ดูแลระบบ    timeout=10s
@@ -44,7 +44,7 @@ TC-10 Login With Wrong Email
 TC-06 Login With Wrong Password
     [Documentation]    ทดสอบการเข้าสู่ระบบโดยกรอกรหัสผ่านผิด
     Initialize Test Case    TC-06
-    Wait Until Page Contains Element    xpath=//*[@id="root"]/div/div/div[1]/h1[contains(text(), 'เลือกบทบาทของคุณ')]    ${1}
+    Wait Until Page Contains Element    xpath=//*[@id="root"]/div/div/div[1]/h1[contains(text(), 'เลือกบทบาทของคุณ')]     ${10}
     Page Should Contain Element    xpath=//*[@id="root"]/div/div/div[2]/div[3]/span[contains(text(), 'ผู้ดูแลระบบ')]
     Capture Step    Select_Role
     Click Element    xpath=//*[@id="root"]/div/div/div[2]/div[3]/span[contains(text(), 'ผู้ดูแลระบบ')]
@@ -62,7 +62,7 @@ TC-06 Login With Wrong Password
 TC-03 Login With Super Admin Account
     [Documentation]    ทดสอบการเข้าสู่ระบบผู้ดูแลระบบ
     Initialize Test Case    TC-03
-    Wait Until Page Contains Element    xpath=//*[@id="root"]/div/div/div[1]/h1[contains(text(), 'เลือกบทบาทของคุณ')]    ${1}
+    Wait Until Page Contains Element    xpath=//*[@id="root"]/div/div/div[1]/h1[contains(text(), 'เลือกบทบาทของคุณ')]    ${10}
     Page Should Contain Element    xpath=//*[@id="root"]/div/div/div[2]/div[3]/span[contains(text(), 'ผู้ดูแลระบบ')]
     Capture Step    Select_Role
     Click Element    xpath=//*[@id="root"]/div/div/div[2]/div[3]/span[contains(text(), 'ผู้ดูแลระบบ')]
@@ -80,7 +80,7 @@ TC-03 Login With Super Admin Account
 TC-07 Wrong OTP
     [Documentation]    ทดสอบการใส่ OTP ผิด
     Initialize Test Case    TC-07
-    Wait Until Page Contains Element    xpath=//*[@id="root"]/div/div/div[1]/h1[contains(text(), 'เลือกบทบาทของคุณ')]    ${1}
+    Wait Until Page Contains Element    xpath=//*[@id="root"]/div/div/div[1]/h1[contains(text(), 'เลือกบทบาทของคุณ')]    ${10}
     Page Should Contain Element    xpath=//*[@id="root"]/div/div/div[2]/div[3]/span[contains(text(), 'ผู้ดูแลระบบ')]
     Click Element    xpath=//*[@id="root"]/div/div/div[2]/div[3]/span[contains(text(), 'ผู้ดูแลระบบ')]
     Input Text    id=login_email     ${SA_EMAIL}
@@ -101,7 +101,7 @@ TC-07 Wrong OTP
 TC-09 Verify OTP
     [Documentation]    ทดสอบการใส่ OTP เพื่อเข้าสู่ระบบ
     Initialize Test Case    TC-09
-    Wait Until Page Contains Element    xpath=//*[@id="root"]/div/div/div[1]/h1[contains(text(), 'เลือกบทบาทของคุณ')]    ${1}
+    Wait Until Page Contains Element    xpath=//*[@id="root"]/div/div/div[1]/h1[contains(text(), 'เลือกบทบาทของคุณ')]     ${10}
     Page Should Contain Element    xpath=//*[@id="root"]/div/div/div[2]/div[3]/span[contains(text(), 'ผู้ดูแลระบบ')]
     Click Element    xpath=//*[@id="root"]/div/div/div[2]/div[3]/span[contains(text(), 'ผู้ดูแลระบบ')]
     Input Text    id=login_email     ${SA_EMAIL}
@@ -119,7 +119,7 @@ TC-09 Verify OTP
 TC-07 Create Admin Account
     [Documentation]    ทดสอบการสร้างบัญชีผู้ใช้
     Initialize Test Case    TC-002
-    Wait Until Page Contains Element    xpath=//*[@id="root"]/div/div/div[1]/h1[contains(text(), 'เลือกบทบาทของคุณ')]    ${1}
+    Wait Until Page Contains Element    xpath=//*[@id="root"]/div/div/div[1]/h1[contains(text(), 'เลือกบทบาทของคุณ')]    ${10}
     Page Should Contain Element    xpath=//*[@id="root"]/div/div/div[2]/div[3]/span[contains(text(), 'ผู้ดูแลระบบ')]
     Click Element    xpath=//*[@id="root"]/div/div/div[2]/div[3]/span[contains(text(), 'ผู้ดูแลระบบ')]
     Page Should Contain Element    xpath=//*[@id="root"]/div/div/div[2]/h1/span[contains(text(), 'ผู้ดูแลระบบ')]
