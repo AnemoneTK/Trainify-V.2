@@ -5,6 +5,8 @@ Resource          ../utils/variables.robot
 
 Suite Setup       Open Browser And Maximize
 Suite Teardown    Close All Browsers
+Test Setup        Reset To Home Page
+Test Teardown     Clear Test Data
 
 *** Test Cases ***
 TC-10 Login With Wrong Format Email

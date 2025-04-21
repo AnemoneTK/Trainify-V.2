@@ -7,6 +7,16 @@ Library           Collections
 Resource          variables.robot
 
 *** Keywords ***
+Reset To Home Page
+    Go To    ${BASE_URL}
+    Wait Until Page Contains Element    xpath=//*[@id="root"]/div/div/div[1]/h1[contains(text(), 'เลือกบทบาทของคุณ')]    timeout=10s
+
+Clear Test Data
+    # ล้างข้อมูลการทดสอบหรือปิดกล่องข้อความแจ้งเตือน
+    ${alert_exists}=    Run Keyword And Return Status    Page Should Contain Element    xpath=//div[contains(@class, 'swal2-container')]
+    Run Keyword If    ${alert_exists}    Click Element    xpath=//button[contains(text(), 'ตกลง')]
+
+
 Wait To Screenshot
     [Arguments]    ${step_name}    ${wait_time}=1
     Sleep    ${wait_time}s
