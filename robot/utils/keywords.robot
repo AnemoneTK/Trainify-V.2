@@ -9,7 +9,7 @@ Resource          variables.robot
 *** Keywords ***
 Reset To Home Page
     Go To    ${BASE_URL}
-    Wait Until Page Contains Element    xpath=//*[@id="root"]/div/div/div[1]/h1[contains(text(), 'เลือกบทบาทของคุณ')]    timeout=10s
+    Wait Until Page Contains Element    xpath=//*[@id="root"]/div/div/div[1]/h1[contains(text(), 'เลือกบทบาทของคุณ')]    timeout=2s
 
 Clear Test Data
     # ล้างข้อมูลการทดสอบหรือปิดกล่องข้อความแจ้งเตือน
