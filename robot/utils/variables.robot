@@ -30,14 +30,12 @@ ${ADMIN_STATUS}    active    # กรณีสร้างด้วย admin ร
 
 
 #SUPER ADMIN TEST DATA 
-# ${SA_EMAIL}    superadmin@example.com  # ค่าเริ่มต้น (จะถูกแทนที่ถ้ามีการส่งค่ามาจาก CLI)
-# ${SA_PASS}    0000000000000    # ค่าเริ่มต้น
-${SA_EMAIL}    Copp.teenkung@gmail.com
-${SA_PASS}    1103703577409
+${SA_EMAIL}    superadmin@example.com  # ค่าเริ่มต้น (จะถูกแทนที่ถ้ามีการส่งค่ามาจาก CLI)
+${SA_PASS}    0000000000000    # ค่าเริ่มต้น
 ${SA_TITLE_NAME}    นางสาว
-${SA_FIRST_NAME}    Admin    # ค่าเริ่มต้น
+${SA_FIRST_NAME}    SA    # ค่าเริ่มต้น
 ${SA_LAST_NAME}    Account    # ค่าเริ่มต้น
-${SA_ROLE}    admin
+${SA_ROLE}    super_admin
 ${SA_PHONE}    0000000000    # ค่าเริ่มต้น
 ${SA_DEPARTMENT}    67303d28feb812c5563e9960    # ค่าเริ่มต้น
 ${SA_STATUS}    active    

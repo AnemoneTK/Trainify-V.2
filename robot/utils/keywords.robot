@@ -14,8 +14,7 @@ Wait To Screenshot
     ${folder_path}=    Set Variable    ../robot/result/screenshot/${TEST NAME}
     Create Directory    ${folder_path}
     # จับภาพหน้าจอด้วยชื่อไฟล์ที่มีความหมาย
-    ${timestamp}=    Get Time    epoch
-    Capture Page Screenshot    ${folder_path}/${step_name}_${timestamp}.png
+    Capture Page Screenshot    ${folder_path}/${step_name}.png
     Log    จับภาพหน้าจอ ${step_name} สำหรับ ${TEST NAME} เรียบร้อย    console=True
 
 Initialize Test Case

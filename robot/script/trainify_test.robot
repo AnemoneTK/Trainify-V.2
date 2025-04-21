@@ -7,14 +7,13 @@ Suite Setup       Open Browser And Maximize
 Suite Teardown    Close All Browsers
 
 *** Test Cases ***
-TC-05 Super Admin Login Success
+TC-10 Login With Wrong Format Email
     [Documentation]    ทดสอบการเข้าสู่ระบบโดยกรอกรูปแบบ Email ผิด
-    Initialize Test Case    TC-05
+    Initialize Test Case    TC-10
     Wait Until Page Contains Element    xpath=//*[@id="root"]/div/div/div[1]/h1[contains(text(), 'เลือกบทบาทของคุณ')]    ${1}
     Page Should Contain Element    xpath=//*[@id="root"]/div/div/div[2]/div[3]/span[contains(text(), 'ผู้ดูแลระบบ')]
     Capture Step    Select_Role
     Click Element    xpath=//*[@id="root"]/div/div/div[2]/div[3]/span[contains(text(), 'ผู้ดูแลระบบ')]
-    Page Should Contain Element    xpath=//*[@id="root"]/div/div/div[2]/h1/span[contains(text(), 'ผู้ดูแลระบบ')]
     Capture Step    Super_Admin_Login_Page
     Input Text    id=login_email    email.com
     Capture Step    Input_Wrong_Format_Email
@@ -24,23 +23,97 @@ TC-05 Super Admin Login Success
     Page Should Contain Element    xpath=//*[@id="login_email_help"]/div[contains(text(), 'กรุณากรอกอีเมลที่ถูกต้อง!')]
     Capture Step    After_Submit
 
-TC-01 Super Admin Login Success
-    [Documentation]    ทดสอบการเข้าสู่ระบบของผู้ดูแลระบบ
-    Initialize Test Case    TC-01
+TC-10 Login With Wrong Email
+    [Documentation]    ทดสอบการเข้าสู่ระบบโดยกรอกอีเมลผิดหรืออีเมลที่ยังไม่มีในระบบ
+    Initialize Test Case    TC-05
+    Wait Until Page Contains Element    xpath=//*[@id="root"]/div/div/div[1]/h1[contains(text(), 'เลือกบทบาทของคุณ')]    ${1}
+    Capture Step    Select_Role
+    Click Element    xpath=//*[@id="root"]/div/div/div[2]/div[3]/span[contains(text(), 'ผู้ดูแลระบบ')]
+    Wait Until Page Contains    ผู้ดูแลระบบ    timeout=10s
+    Capture Step    Super_Admin_Login_Page
+    Input Text    id=login_email     narisara.hun@gmail.com
+    Capture Step    Input_Wrong_Email
+    Input Password    id=login_password    123456789
+    Capture Step    Input_Password
+    Click Button    xpath=//*[@id="login"]/div[3]/div/div/div/div/button[contains(text(), 'เข้าสู่ระบบ')]
+    Wait Until Page Contains    ไม่พบบัญชีผู้ใช้    timeout=10s
+    Capture Step    After_Submit
+    Click Button    xpath=/html/body/div[2]/div/div[6]/button[1][contains(text(), 'ตกลง')]
+    Capture Step    Close_Alert
+
+TC-06 Login With Wrong Password
+    [Documentation]    ทดสอบการเข้าสู่ระบบโดยกรอกรหัสผ่านผิด
+    Initialize Test Case    TC-06
     Wait Until Page Contains Element    xpath=//*[@id="root"]/div/div/div[1]/h1[contains(text(), 'เลือกบทบาทของคุณ')]    ${1}
     Page Should Contain Element    xpath=//*[@id="root"]/div/div/div[2]/div[3]/span[contains(text(), 'ผู้ดูแลระบบ')]
     Capture Step    Select_Role
     Click Element    xpath=//*[@id="root"]/div/div/div[2]/div[3]/span[contains(text(), 'ผู้ดูแลระบบ')]
-    Page Should Contain Element    xpath=//*[@id="root"]/div/div/div[2]/h1/span[contains(text(), 'ผู้ดูแลระบบ')]
     Capture Step    Super_Admin_Login_Page
-    Input Text    id=login_email    ${SA_EMAIL}
-    Capture Step    Input_Email
+    Input Text    id=login_email     ${SA_EMAIL}
+    Capture Step    Input_Wrong_Format_Email
+    Input Password    id=login_password    123456789
+    Capture Step    Input_Password
+    Click Button    xpath=//*[@id="login"]/div[3]/div/div/div/div/button[contains(text(), 'เข้าสู่ระบบ')]
+    Wait Until Page Contains    รหัสผ่านไม่ถูกต้อง    timeout=10s
+    Capture Step    After_Submit
+    Click Button    xpath=/html/body/div[2]/div/div[6]/button[1][contains(text(), 'ตกลง')]
+    Capture Step    Close_Alert
+
+TC-03 Login With Super Admin Account
+    [Documentation]    ทดสอบการเข้าสู่ระบบผู้ดูแลระบบ
+    Initialize Test Case    TC-03
+    Wait Until Page Contains Element    xpath=//*[@id="root"]/div/div/div[1]/h1[contains(text(), 'เลือกบทบาทของคุณ')]    ${1}
+    Page Should Contain Element    xpath=//*[@id="root"]/div/div/div[2]/div[3]/span[contains(text(), 'ผู้ดูแลระบบ')]
+    Capture Step    Select_Role
+    Click Element    xpath=//*[@id="root"]/div/div/div[2]/div[3]/span[contains(text(), 'ผู้ดูแลระบบ')]
+    Capture Step    Super_Admin_Login_Page
+    Input Text    id=login_email     ${SA_EMAIL}
+    Capture Step    Input__Email
     Input Password    id=login_password    ${SA_PASS}
     Capture Step    Input_Password
     Click Button    xpath=//*[@id="login"]/div[3]/div/div/div/div/button[contains(text(), 'เข้าสู่ระบบ')]
-    Page Should Contain Element    xpath=//*[@id="root"]/div/div/div[1][contains(text(), 'ยืนยันรหัส OTP')]
+    Wait Until Page Contains    ยืนยันรหัส OTP    timeout=10s
     Capture Step    After_Submit
+    Click Button    xpath=/html/body/div[2]/div/div[6]/button[1][contains(text(), 'ตกลง')]
+    Capture Step    Close_Alert
 
+TC-07 Wrong OTP
+    [Documentation]    ทดสอบการใส่ OTP ผิด
+    Initialize Test Case    TC-07
+    Wait Until Page Contains Element    xpath=//*[@id="root"]/div/div/div[1]/h1[contains(text(), 'เลือกบทบาทของคุณ')]    ${1}
+    Page Should Contain Element    xpath=//*[@id="root"]/div/div/div[2]/div[3]/span[contains(text(), 'ผู้ดูแลระบบ')]
+    Click Element    xpath=//*[@id="root"]/div/div/div[2]/div[3]/span[contains(text(), 'ผู้ดูแลระบบ')]
+    Input Text    id=login_email     ${SA_EMAIL}
+    Input Password    id=login_password    ${SA_PASS}
+    Click Button    xpath=//*[@id="login"]/div[3]/div/div/div/div/button[contains(text(), 'เข้าสู่ระบบ')]
+    Capture Step    After_Submit
+    Wait Until Page Contains    ยืนยันรหัส OTP   timeout=10s
+    Capture Step    OTP_Verify_Page
+    Input Text  xpath=/html/body/div/div/div/div[3]/div[1]/div/input[1]  111111
+    Capture Step    Input_OTP
+    Wait Until Element Is Enabled   xpath=//*[@id="root"]/div/div/div[4]/button     30s
+    Click Button    xpath=//*[@id="root"]/div/div/div[4]/button
+    Wait Until Page Contains    OTP ไม่ถูกต้อง    timeout=10s
+    Capture Step    After_Submit
+    Click Button    xpath=/html/body/div[2]/div/div[6]/button[1][contains(text(), 'ตกลง')]
+    Capture Step    Close_Alert
+
+TC-09 Verify OTP
+    [Documentation]    ทดสอบการใส่ OTP เพื่อเข้าสู่ระบบ
+    Initialize Test Case    TC-09
+    Wait Until Page Contains Element    xpath=//*[@id="root"]/div/div/div[1]/h1[contains(text(), 'เลือกบทบาทของคุณ')]    ${1}
+    Page Should Contain Element    xpath=//*[@id="root"]/div/div/div[2]/div[3]/span[contains(text(), 'ผู้ดูแลระบบ')]
+    Click Element    xpath=//*[@id="root"]/div/div/div[2]/div[3]/span[contains(text(), 'ผู้ดูแลระบบ')]
+    Input Text    id=login_email     ${SA_EMAIL}
+    Input Password    id=login_password    ${SA_PASS}
+    Click Button    xpath=//*[@id="login"]/div[3]/div/div/div/div/button[contains(text(), 'เข้าสู่ระบบ')]
+    Capture Step    After_Submit
+    Wait Until Page Contains    ยืนยันรหัส OTP   timeout=10s
+    Capture Step    OTP Verify Page
+    Wait Until Element Is Enabled   xpath=//*[@id="root"]/div/div/div[4]/button     30s
+    Click Button    xpath=//*[@id="root"]/div/div/div[4]/button
+    Wait Until Page Contains   Trainify : Super Admin    timeout=10s
+    Capture Step    Super_Admin_Dashboard
 
 
 TC-07 Create Admin Account
@@ -56,81 +129,3 @@ TC-07 Create Admin Account
     Page Should Contain Element    xpath=//*[@id="root"]/div/div/div[1][contains(text(), 'ยืนยันรหัส OTP')]
     Capture Step    After_Submit
 
-# TC-002 Login As Employee With Valid Credentials
-#     [Documentation]    ทดสอบการเข้าสู่ระบบด้วยบัญชีพนักงานที่ถูกต้อง
-#     Login    ${EMP_EMAIL}    ${EMP_PASS}    ${EMP_ROLE}
-#     Input OTP
-#     Verify Dashboard For Role    ${EMP_ROLE}
-#     Logout
-
-# TC-003 Login As Admin With Valid Credentials
-#     [Documentation]    ทดสอบการเข้าสู่ระบบด้วยบัญชีผู้ดูแลที่ถูกต้อง
-#     Login    ${VALID_ADMIN_EMAIL}    ${VALID_PASSWORD}    admin
-#     Input OTP    ${OTP_CODE}
-#     Verify Dashboard For Role    admin
-#     Logout
-
-# TC-004 Login As Super Admin With Valid Credentials
-#     [Documentation]    ทดสอบการเข้าสู่ระบบด้วยบัญชีผู้ดูแลระบบที่ถูกต้อง
-#     Login    ${VALID_SUPER_ADMIN_EMAIL}    ${VALID_PASSWORD}    super_admin
-#     Input OTP    ${OTP_CODE}
-#     Verify Dashboard For Role    super_admin
-#     Logout
-
-# TC-005 Login With Invalid Email
-#     [Documentation]    ทดสอบการเข้าสู่ระบบด้วยอีเมลที่ไม่ถูกต้อง
-#     Login    ${INVALID_EMAIL}    ${VALID_PASSWORD}    employee
-#     Verify Login Failed    ไม่พบบัญชีผู้ใช้
-
-# TC-006 Login With Invalid Password
-#     [Documentation]    ทดสอบการเข้าสู่ระบบด้วยรหัสผ่านที่ไม่ถูกต้อง
-#     Login    ${EMP_EMAIL}    ${INVALID_PASSWORD}    employee
-#     Verify Login Failed    รหัสผ่านไม่ถูกต้อง
-
-# TC-007 View All Courses And Search
-#     [Documentation]    ทดสอบการดูรายการหลักสูตรทั้งหมดและค้นหา
-#     Login    ${EMP_EMAIL}    ${VALID_PASSWORD}    employee
-#     Input OTP    ${OTP_CODE}
-#     View All Courses As Employee
-#     Search Courses    Python
-#     # ตรวจสอบผลการค้นหา (ปรับตามข้อมูลจริง)
-#     Wait Until Page Does Not Contain Element    xpath=//div[contains(text(), 'Java')]    timeout=3s
-#     Logout
-
-# TC-008 Register For Course
-#     [Documentation]    ทดสอบการลงทะเบียนหลักสูตร
-#     Login    ${EMP_EMAIL}    ${VALID_PASSWORD}    employee
-#     Input OTP    ${OTP_CODE}
-#     View All Courses As Employee
-#     ${course_title}=    Register For Course
-#     View Registered Courses
-#     # ตรวจสอบว่าคอร์สที่ลงทะเบียนปรากฏในรายการ
-#     Page Should Contain Element    xpath=//span[contains(text(), '${course_title}')]
-#     Logout
-
-# TC-009 Create New User As Admin
-#     [Documentation]    ทดสอบการสร้างผู้ใช้ใหม่โดยผู้ดูแล
-#     Login    ${VALID_ADMIN_EMAIL}    ${VALID_PASSWORD}    admin
-#     Input OTP    ${OTP_CODE}
-#     ${new_user_email}=    Create New User As Admin
-#     # ตรวจสอบว่าผู้ใช้ใหม่ปรากฏในรายการ
-#     Search Courses    ${new_user_email}
-#     Page Should Contain Element    xpath=//td[contains(text(), '${new_user_email}')]
-#     Logout
-
-# TC-010 Create New Course As Admin
-#     [Documentation]    ทดสอบการสร้างหลักสูตรใหม่โดยผู้ดูแล
-#     Login    ${VALID_ADMIN_EMAIL}    ${VALID_PASSWORD}    admin
-#     Input OTP    ${OTP_CODE}
-#     ${course_name}=    Create New Course As Admin
-#     # ตรวจสอบว่าหลักสูตรใหม่ปรากฏในรายการ
-#     Search Courses    ${course_name}
-#     Page Should Contain Element    xpath=//td[contains(text(), '${course_name}')]
-#     Logout
-
-# TC-011 Confirm Course Results
-#     [Documentation]    ทดสอบการยืนยันผลการอบรม
-#     Login    ${VALID_ADMIN_EMAIL}    ${VALID_PASSWORD}    admin
-#     Input OTP    ${OTP_CODE}
-#     View Course And Confirm Results
-#     Logout

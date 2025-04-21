@@ -28,9 +28,9 @@ pipeline {
         TEST_SUPER_ADMIN_FIRST_NAME = 'Super'
         TEST_SUPER_ADMIN_LAST_NAME = 'Admin'
         TEST_SUPER_ADMIN_PHONE = credentials('SUPER_ADMIN_PHONE')
-
+   
         // Admin Credentials
-        TEST_ADMIN_EMAIL = credentials('TEST_ADMIN_EMAIL')
+        TEST_ADMIN_EMAIL = credentials('TEST_AD MIN_EMAIL')
         TEST_ADMIN_PASSWORD = credentials('TEST_ADMIN_PASSWORD')
         TEST_ADMIN_FIRST_NAME = credentials('TEST_ADMIN_FIRST_NAME')
         TEST_ADMIN_LAST_NAME = credentials('TEST_ADMIN_LAST_NAME')
@@ -185,22 +185,6 @@ pipeline {
             }
         }
 
-        // stage('Build') {
-        //     steps {
-        //         script {
-        //             echo "Current directory: ${pwd()}"
-        //             echo "Listing files:"
-        //             sh 'ls -l'
-        //             echo "Building Docker image..."
-        //             sh """
-        //                 export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
-        //                 docker-compose -f $DOCKER_COMPOSE_FILE build --no-cache
-        //             """
-        //             echo "Docker image build complete."
-        //         }
-        //     }
-        // }
-
         stage('Deploy') {
             steps {
                 script {
@@ -219,10 +203,11 @@ pipeline {
             steps {
                 script {
                     sh """
-                        robot --variable VALID_EMP_EMAIL:${TEST_VALID_EMP_EMAIL} \
-                        --variable VALID_ADMIN_EMAIL:${TEST_VALID_ADMIN_EMAIL} \
-                        --variable VALID_SUPER_ADMIN_EMAIL:${TEST_VALID_SUPER_ADMIN_EMAIL} \
-                        --variable VALID_PASSWORD:${TEST_VALID_PASSWORD} \
+                        robot --variable SA_EMAIL:${SUPER_ADMIN_EMAIL} \
+                        --variable SA_PASS:${SUPER_ADMIN_PASSWORD} \
+                        --variable ADMIN_EMAIL:${TEST_ADMIN_EMAIL} \
+                        --variable ADMIN_PASS:${TEST_ADMIN_PASSWORD} \
+                        --variable ADMIN_PHONE:${TEST_ADMIN_PHONE} \
                         trainify_tests.robot
                     """
                     echo "Running Robot Framework tests..."
